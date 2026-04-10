@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 export type SectionKey = 'successes' | 'opportunities' | 'failures' | 'threats' | 'issues';
 
@@ -10,12 +10,51 @@ const SECTION_META: Record<SectionKey, { label: string; letter: string; color: s
   issues:        { label: 'Issues',        letter: 'I', color: 'text-amber-700',   bg: 'bg-amber-50',    border: 'border-amber-200',   badge: 'bg-amber-500'   },
 };
 
+// Auto-growing textarea helper
+function AutoTextarea({
+  value,
+  onChange,
+  onKeyDown,
+  placeholder,
+  className,
+  dataItem,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  placeholder?: string;
+  className?: string;
+  dataItem?: boolean;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.style.height = 'auto';
+      ref.current.style.height = ref.current.scrollHeight + 'px';
+    }
+  }, [value]);
+
+  return (
+    <textarea
+      ref={ref}
+      value={value}
+      rows={1}
+      onChange={e => onChange(e.target.value)}
+      onKeyDown={onKeyDown}
+      placeholder={placeholder}
+      data-item={dataItem ? 'true' : undefined}
+      className={`resize-none overflow-hidden ${className ?? ''}`}
+    />
+  );
+}
+
 // ─── Read-only view (member report in consolidation panel) ─────────────────────
 
 interface ReadOnlyProps {
   section: SectionKey;
   items: string[];
-  onCopy?: (item: string) => void; // copy to consolidated
+  onCopy?: (item: string) => void;
 }
 
 export function SOFTISectionReadOnly({ section, items, onCopy }: ReadOnlyProps) {
@@ -33,8 +72,8 @@ export function SOFTISectionReadOnly({ section, items, onCopy }: ReadOnlyProps) 
         <ul className="space-y-1">
           {items.map((item, i) => (
             <li key={i} className="flex items-start gap-2 text-sm text-gray-700 group">
-              <span className={`mt-0.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${meta.badge}`} />
-              <span className="flex-1">{item}</span>
+              <span className={`mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0 ${meta.badge}`} />
+              <span className="flex-1 whitespace-pre-wrap">{item}</span>
               {onCopy && (
                 <button
                   onClick={() => onCopy(item)}
@@ -58,18 +97,21 @@ interface EditableProps {
   section: SectionKey;
   items: string[];
   onChange: (items: string[]) => void;
-  canReorder?: boolean; // show up/down arrows
+  canReorder?: boolean;
 }
 
 export function SOFTISectionEditable({ section, items, onChange, canReorder = false }: EditableProps) {
   const meta = SECTION_META[section];
   const [draft, setDraft] = useState('');
+  const addInputRef = useRef<HTMLTextAreaElement>(null);
 
   function add() {
     const trimmed = draft.trim();
     if (!trimmed) return;
     onChange([...items, trimmed]);
     setDraft('');
+    // refocus after add
+    setTimeout(() => addInputRef.current?.focus(), 0);
   }
 
   function remove(i: number) {
@@ -96,8 +138,33 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
     onChange(next);
   }
 
+  function handleAddKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      add();
+    }
+    // Shift+Enter: default textarea behavior (newline)
+  }
+
+  function handleItemKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>, i: number) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      // Insert a new empty item after this one
+      const next = [...items];
+      next.splice(i + 1, 0, '');
+      onChange(next);
+      // Focus new item — let React re-render first
+      setTimeout(() => {
+        const textareas = document.querySelectorAll<HTMLTextAreaElement>(
+          `[data-section="${section}"] textarea[data-item]`
+        );
+        textareas[i + 1]?.focus();
+      }, 0);
+    }
+  }
+
   return (
-    <div className={`rounded-lg border ${meta.border} ${meta.bg} p-3 mb-3`}>
+    <div className={`rounded-lg border ${meta.border} ${meta.bg} p-3 mb-3`} data-section={section}>
       {/* Header */}
       <div className={`flex items-center gap-2 mb-3 font-semibold text-sm ${meta.color}`}>
         <span className={`${meta.badge} text-white text-xs px-1.5 py-0.5 rounded font-bold`}>{meta.letter}</span>
@@ -111,9 +178,9 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
       )}
       <ul className="space-y-1.5 mb-3">
         {items.map((item, i) => (
-          <li key={i} className="flex items-center gap-1.5 group">
+          <li key={i} className="flex items-start gap-1.5 group">
             {canReorder && (
-              <div className="flex flex-col gap-0.5">
+              <div className="flex flex-col gap-0.5 mt-1">
                 <button
                   onClick={() => moveUp(i)}
                   disabled={i === 0}
@@ -128,16 +195,17 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
                 >▼</button>
               </div>
             )}
-            <span className={`mt-0.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${meta.badge}`} />
-            <input
-              type="text"
+            <span className={`mt-2 w-1.5 h-1.5 rounded-full flex-shrink-0 ${meta.badge}`} />
+            <AutoTextarea
               value={item}
-              onChange={e => editItem(i, e.target.value)}
+              onChange={v => editItem(i, v)}
+              onKeyDown={e => handleItemKeyDown(e, i)}
+              dataItem={true}
               className="flex-1 bg-white border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400"
             />
             <button
               onClick={() => remove(i)}
-              className="text-red-400 hover:text-red-600 text-xs font-bold px-1 opacity-60 hover:opacity-100 transition"
+              className="text-red-400 hover:text-red-600 text-xs font-bold px-1 mt-1 opacity-60 hover:opacity-100 transition"
               title="Remove"
             >
               ×
@@ -147,19 +215,18 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
       </ul>
 
       {/* Add new item */}
-      <div className="flex gap-2">
-        <input
-          type="text"
+      <div className="flex gap-2 items-start">
+        <AutoTextarea
           value={draft}
-          onChange={e => setDraft(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && add()}
-          placeholder={`Add ${meta.label.toLowerCase()} item...`}
+          onChange={setDraft}
+          onKeyDown={handleAddKeyDown}
+          placeholder={`Add ${meta.label.toLowerCase()}… (Enter to add, Shift+Enter for new line)`}
           className="flex-1 bg-white border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400"
         />
         <button
           onClick={add}
           disabled={!draft.trim()}
-          className={`px-3 py-1.5 rounded text-sm font-medium transition ${
+          className={`px-3 py-1.5 rounded text-sm font-medium transition flex-shrink-0 ${
             draft.trim()
               ? `${meta.badge} text-white hover:opacity-90`
               : 'bg-gray-200 text-gray-400 cursor-not-allowed'
@@ -168,6 +235,7 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
           + Add
         </button>
       </div>
+      <p className="text-xs text-gray-400 mt-1">Enter 添加条目 · Shift+Enter 换行</p>
     </div>
   );
 }

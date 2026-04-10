@@ -5,22 +5,39 @@ import { getReports, saveReport } from '../api';
 import { getCurrentWeek } from '../utils';
 import { EMPTY_SOFTI, type SOFTIData } from '../types';
 import WeekSelector from '../components/WeekSelector';
-import { SOFTISectionEditable } from '../components/SOFTISection';
+import { SOFTISectionEditable, SOFTISectionReadOnly } from '../components/SOFTISection';
 import type { SectionKey } from '../components/SOFTISection';
+import type { WeeklyReport } from '../types';
 
 const SECTIONS: SectionKey[] = ['successes', 'opportunities', 'failures', 'threats', 'issues'];
 
+const SECTION_LABELS: Record<SectionKey, string> = {
+  successes: 'Successes',
+  opportunities: 'Opportunities',
+  failures: 'Failures',
+  threats: 'Threats',
+  issues: 'Issues',
+};
+
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
+type Tab = 'edit' | 'history';
 
 export default function MemberReport() {
   const { user } = useUser();
   const [searchParams, setSearchParams] = useSearchParams();
   const week = searchParams.get('week') || getCurrentWeek();
 
-  const [data, setData]         = useState<SOFTIData>({ ...EMPTY_SOFTI, successes: [], opportunities: [], failures: [], threats: [], issues: [] });
+  const [data, setData]         = useState<SOFTIData>({ ...EMPTY_SOFTI });
   const [status, setStatus]     = useState<'draft' | 'submitted'>('draft');
   const [saveState, setSave]    = useState<SaveState>('idle');
   const [loading, setLoading]   = useState(true);
+  const [tab, setTab]           = useState<Tab>('edit');
+
+  // History state
+  const [history, setHistory]         = useState<WeeklyReport[]>([]);
+  const [historyLoading, setHLoading] = useState(false);
+  const [expandedWeek, setExpanded]   = useState<string | null>(null);
+  const [copied, setCopied]           = useState<string | null>(null);
 
   const loadReport = useCallback(async () => {
     if (!user?.member_id) return;
@@ -42,6 +59,25 @@ export default function MemberReport() {
   }, [week, user?.member_id]);
 
   useEffect(() => { loadReport(); }, [loadReport]);
+
+  const loadHistory = useCallback(async () => {
+    if (!user?.member_id) return;
+    setHLoading(true);
+    try {
+      const all = await getReports({ member_id: user.member_id });
+      // Sort newest first
+      all.sort((a, b) => (b.week > a.week ? 1 : -1));
+      setHistory(all);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setHLoading(false);
+    }
+  }, [user?.member_id]);
+
+  useEffect(() => {
+    if (tab === 'history') loadHistory();
+  }, [tab, loadHistory]);
 
   function setSection(section: SectionKey, items: string[]) {
     setData(prev => ({ ...prev, [section]: items }));
@@ -67,6 +103,20 @@ export default function MemberReport() {
     }
   }
 
+  function copyFromHistory(report: WeeklyReport) {
+    setData({
+      successes:     [...report.data.successes],
+      opportunities: [...report.data.opportunities],
+      failures:      [...report.data.failures],
+      threats:       [...report.data.threats],
+      issues:        [...report.data.issues],
+    });
+    setSave('idle');
+    setCopied(report.week);
+    setTab('edit');
+    setTimeout(() => setCopied(null), 3000);
+  }
+
   const totalItems = SECTIONS.reduce((sum, s) => sum + data[s].length, 0);
   const isSubmitted = status === 'submitted';
 
@@ -83,60 +133,188 @@ export default function MemberReport() {
         <WeekSelector week={week} onChange={w => setSearchParams({ week: w })} />
       </div>
 
-      {/* Status bar */}
-      <div className={`rounded-lg px-4 py-2.5 mb-5 flex items-center justify-between text-sm ${
-        isSubmitted ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
-                    : 'bg-amber-50 border border-amber-200 text-amber-700'
-      }`}>
-        <span>
-          Status: <strong>{isSubmitted ? 'Submitted' : 'Draft'}</strong>
-          {' · '}{totalItems} item{totalItems !== 1 ? 's' : ''} total
-        </span>
-        {saveState === 'saved' && <span className="text-emerald-600 font-medium">✓ Saved</span>}
-        {saveState === 'error' && <span className="text-red-600 font-medium">✗ Error saving</span>}
-        {saveState === 'saving' && <span className="text-gray-500">Saving…</span>}
+      {/* Tabs */}
+      <div className="flex gap-1 mb-5 border-b border-gray-200">
+        <button
+          onClick={() => setTab('edit')}
+          className={`px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 transition ${
+            tab === 'edit'
+              ? 'border-indigo-600 text-indigo-700 bg-indigo-50'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          Edit Report
+        </button>
+        <button
+          onClick={() => setTab('history')}
+          className={`px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 transition ${
+            tab === 'history'
+              ? 'border-indigo-600 text-indigo-700 bg-indigo-50'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          History
+        </button>
       </div>
 
-      {loading ? (
-        <div className="text-center py-12 text-gray-400">Loading…</div>
-      ) : (
+      {/* Copied notification */}
+      {copied && (
+        <div className="mb-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-2.5 text-sm flex items-center gap-2">
+          <span>✓</span>
+          <span>已将 <strong>{copied}</strong> 的内容复制到当前页面，请检查并保存。</span>
+        </div>
+      )}
+
+      {/* ── EDIT TAB ── */}
+      {tab === 'edit' && (
         <>
-          {/* SOFTI Sections */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-1">
-            {SECTIONS.map(s => (
-              <SOFTISectionEditable
-                key={s}
-                section={s}
-                items={data[s]}
-                onChange={items => setSection(s, items)}
-              />
-            ))}
+          {/* Status bar */}
+          <div className={`rounded-lg px-4 py-2.5 mb-5 flex items-center justify-between text-sm ${
+            isSubmitted ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+                        : 'bg-amber-50 border border-amber-200 text-amber-700'
+          }`}>
+            <span>
+              Status: <strong>{isSubmitted ? 'Submitted' : 'Draft'}</strong>
+              {' · '}{totalItems} item{totalItems !== 1 ? 's' : ''} total
+            </span>
+            {saveState === 'saved'  && <span className="text-emerald-600 font-medium">✓ Saved</span>}
+            {saveState === 'error'  && <span className="text-red-600 font-medium">✗ Error saving</span>}
+            {saveState === 'saving' && <span className="text-gray-500">Saving…</span>}
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-3 mt-4 justify-end">
-            <button
-              onClick={() => handleSave('draft')}
-              disabled={saveState === 'saving'}
-              className="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 text-sm font-medium transition disabled:opacity-50"
-            >
-              Save Draft
-            </button>
-            <button
-              onClick={() => handleSave('submitted')}
-              disabled={saveState === 'saving' || isSubmitted}
-              className="px-5 py-2 rounded-lg bg-indigo-700 hover:bg-indigo-600 text-white text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitted ? '✓ Submitted' : 'Submit Report'}
-            </button>
-          </div>
+          {loading ? (
+            <div className="text-center py-12 text-gray-400">Loading…</div>
+          ) : (
+            <>
+              {/* SOFTI Sections */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-1">
+                {SECTIONS.map(s => (
+                  <SOFTISectionEditable
+                    key={s}
+                    section={s}
+                    items={data[s]}
+                    onChange={items => setSection(s, items)}
+                  />
+                ))}
+              </div>
 
-          {isSubmitted && (
-            <p className="text-xs text-gray-400 text-right mt-2">
-              Report submitted. You can still edit and re-submit.
-            </p>
+              {/* Action Buttons */}
+              <div className="flex gap-3 mt-4 justify-end">
+                <button
+                  onClick={() => handleSave('draft')}
+                  disabled={saveState === 'saving'}
+                  className="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 text-sm font-medium transition disabled:opacity-50"
+                >
+                  Save Draft
+                </button>
+                <button
+                  onClick={() => handleSave('submitted')}
+                  disabled={saveState === 'saving' || isSubmitted}
+                  className="px-5 py-2 rounded-lg bg-indigo-700 hover:bg-indigo-600 text-white text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitted ? '✓ Submitted' : 'Submit Report'}
+                </button>
+              </div>
+
+              {isSubmitted && (
+                <p className="text-xs text-gray-400 text-right mt-2">
+                  Report submitted. You can still edit and re-submit.
+                </p>
+              )}
+            </>
           )}
         </>
+      )}
+
+      {/* ── HISTORY TAB ── */}
+      {tab === 'history' && (
+        <div>
+          {historyLoading ? (
+            <div className="text-center py-12 text-gray-400">Loading history…</div>
+          ) : history.length === 0 ? (
+            <div className="text-center py-12 text-gray-400">No reports found.</div>
+          ) : (
+            <div className="space-y-3">
+              {history.map(r => {
+                const isCurrentWeek = r.week === week;
+                const isExpanded = expandedWeek === r.week;
+                const itemCount = SECTIONS.reduce((n, s) => n + (r.data[s]?.length ?? 0), 0);
+
+                return (
+                  <div
+                    key={r.week}
+                    className={`rounded-xl border bg-white shadow-sm overflow-hidden ${
+                      isCurrentWeek ? 'border-indigo-300' : 'border-gray-200'
+                    }`}
+                  >
+                    {/* Row header */}
+                    <div
+                      className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition"
+                      onClick={() => setExpanded(isExpanded ? null : r.week)}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold text-gray-800 text-sm">{r.week}</span>
+                          {isCurrentWeek && (
+                            <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium">
+                              当前周
+                            </span>
+                          )}
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                            r.status === 'submitted'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : 'bg-amber-100 text-amber-700'
+                          }`}>
+                            {r.status === 'submitted' ? '✓ Submitted' : '◌ Draft'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-0.5">{itemCount} 条内容</p>
+                      </div>
+
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {!isCurrentWeek && (
+                          <button
+                            onClick={e => { e.stopPropagation(); copyFromHistory(r); }}
+                            className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition"
+                            title="复制这周的内容到当前周"
+                          >
+                            复制到当前周
+                          </button>
+                        )}
+                        <span className="text-gray-400 text-xs">{isExpanded ? '▲' : '▼'}</span>
+                      </div>
+                    </div>
+
+                    {/* Expanded detail */}
+                    {isExpanded && (
+                      <div className="border-t border-gray-100 px-4 py-3 bg-gray-50">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {SECTIONS.map(s => (
+                            <SOFTISectionReadOnly
+                              key={s}
+                              section={s}
+                              items={r.data[s] ?? []}
+                            />
+                          ))}
+                        </div>
+                        {!isCurrentWeek && (
+                          <div className="mt-3 flex justify-end">
+                            <button
+                              onClick={() => copyFromHistory(r)}
+                              className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition"
+                            >
+                              一键复制到当前周 ({week})
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
