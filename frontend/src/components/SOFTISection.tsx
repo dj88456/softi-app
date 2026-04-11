@@ -167,7 +167,7 @@ function RichTextInput({
                 if (ref.current) applyFormat(ref.current, btn.action, onChange);
               }}
               style={btn.style}
-              className="w-6 h-6 flex items-center justify-center rounded text-xs text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition select-none"
+              className="w-7 h-7 flex items-center justify-center rounded text-sm font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition select-none"
             >
               {btn.label}
             </button>
@@ -183,7 +183,7 @@ function RichTextInput({
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         placeholder={placeholder}
-        className="w-full resize-none overflow-hidden bg-transparent px-2 py-1.5 text-sm focus:outline-none"
+        className="w-full resize-none overflow-hidden bg-transparent px-2.5 py-2 text-base focus:outline-none"
       />
     </div>
   );
@@ -200,26 +200,26 @@ interface ReadOnlyProps {
 export function SOFTISectionReadOnly({ section, items, onCopy }: ReadOnlyProps) {
   const meta = SECTION_META[section];
   return (
-    <div className={`rounded-lg border ${meta.border} ${meta.bg} p-3 mb-2`}>
-      <div className={`flex items-center gap-2 mb-2 font-semibold text-sm ${meta.color}`}>
-        <span className={`${meta.badge} text-white text-xs px-1.5 py-0.5 rounded font-bold`}>{meta.letter}</span>
+    <div className={`rounded-xl border ${meta.border} ${meta.bg} p-4 mb-2`}>
+      <div className={`flex items-center gap-2 mb-3 font-bold text-base ${meta.color}`}>
+        <span className={`${meta.badge} text-white text-sm px-2 py-0.5 rounded-md font-black`}>{meta.letter}</span>
         {meta.label}
-        <span className="ml-auto text-xs font-normal text-gray-500">{items.length}</span>
+        <span className="ml-auto text-sm font-semibold text-gray-400">{items.length}</span>
       </div>
       {items.length === 0 ? (
-        <p className="text-xs text-gray-400 italic">No entries</p>
+        <p className="text-sm text-gray-400 italic font-normal">No entries</p>
       ) : (
-        <ul className="space-y-1">
+        <ul className="space-y-1.5">
           {items.map((item, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-gray-700 group">
-              <span className={`mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0 ${meta.badge}`} />
-              <span className="flex-1">
+            <li key={i} className="flex items-start gap-2 text-base text-gray-700 group">
+              <span className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${meta.badge}`} />
+              <span className="flex-1 font-medium">
                 <RenderText text={item} />
               </span>
               {onCopy && (
                 <button
                   onClick={() => onCopy(item)}
-                  className="opacity-0 group-hover:opacity-100 text-indigo-500 hover:text-indigo-700 text-xs font-bold transition ml-1"
+                  className="opacity-0 group-hover:opacity-100 text-indigo-500 hover:text-indigo-700 text-sm font-bold transition ml-1"
                   title="Copy to consolidated"
                 >
                   + Add
@@ -276,28 +276,28 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
   }
 
   return (
-    <div className={`rounded-lg border ${meta.border} ${meta.bg} p-3 mb-3`}>
+    <div className={`rounded-xl border ${meta.border} ${meta.bg} p-4 mb-3`}>
       {/* Header */}
-      <div className={`flex items-center gap-2 mb-3 font-semibold text-sm ${meta.color}`}>
-        <span className={`${meta.badge} text-white text-xs px-1.5 py-0.5 rounded font-bold`}>{meta.letter}</span>
+      <div className={`flex items-center gap-2 mb-3 font-bold text-base ${meta.color}`}>
+        <span className={`${meta.badge} text-white text-sm px-2 py-0.5 rounded-md font-black`}>{meta.letter}</span>
         {meta.label}
-        <span className="ml-auto text-xs font-normal text-gray-500">{items.length} item{items.length !== 1 ? 's' : ''}</span>
+        <span className="ml-auto text-sm font-semibold text-gray-400">{items.length} item{items.length !== 1 ? 's' : ''}</span>
       </div>
 
       {/* Existing items */}
       {items.length === 0 && (
-        <p className="text-xs text-gray-400 italic mb-2">No entries yet. Add one below.</p>
+        <p className="text-sm text-gray-400 italic font-normal mb-2">No entries yet. Add one below.</p>
       )}
-      <ul className="space-y-1.5 mb-3">
+      <ul className="space-y-2 mb-3">
         {items.map((item, i) => (
-          <li key={i} className="flex items-start gap-1.5 group">
+          <li key={i} className="flex items-start gap-2 group">
             {canReorder && (
-              <div className="flex flex-col gap-0.5 mt-1">
-                <button onClick={() => moveUp(i)}   disabled={i === 0}                  className="text-gray-400 hover:text-gray-600 disabled:opacity-20 text-xs leading-none" title="Move up">▲</button>
-                <button onClick={() => moveDown(i)} disabled={i === items.length - 1}  className="text-gray-400 hover:text-gray-600 disabled:opacity-20 text-xs leading-none" title="Move down">▼</button>
+              <div className="flex flex-col gap-0.5 mt-2">
+                <button onClick={() => moveUp(i)}   disabled={i === 0}                 className="text-gray-400 hover:text-gray-600 disabled:opacity-20 text-sm leading-none" title="Move up">▲</button>
+                <button onClick={() => moveDown(i)} disabled={i === items.length - 1} className="text-gray-400 hover:text-gray-600 disabled:opacity-20 text-sm leading-none" title="Move down">▼</button>
               </div>
             )}
-            <span className={`mt-2 w-1.5 h-1.5 rounded-full flex-shrink-0 ${meta.badge}`} />
+            <span className={`mt-2.5 w-2 h-2 rounded-full flex-shrink-0 ${meta.badge}`} />
             <RichTextInput
               value={item}
               onChange={v => editItem(i, v)}
@@ -305,7 +305,7 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
             />
             <button
               onClick={() => remove(i)}
-              className="text-red-400 hover:text-red-600 text-xs font-bold px-1 mt-1 opacity-60 hover:opacity-100 transition"
+              className="text-red-400 hover:text-red-600 text-base font-bold px-1 mt-1.5 opacity-50 hover:opacity-100 transition"
               title="Remove"
             >×</button>
           </li>
@@ -325,14 +325,14 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
         <button
           onClick={add}
           disabled={!draft.trim()}
-          className={`px-3 py-1.5 rounded text-sm font-medium transition flex-shrink-0 mt-0.5 ${
+          className={`px-4 py-2 rounded-lg text-base font-semibold transition flex-shrink-0 ${
             draft.trim() ? `${meta.badge} text-white hover:opacity-90` : 'bg-gray-200 text-gray-400 cursor-not-allowed'
           }`}
         >
           + Add
         </button>
       </div>
-      <p className="text-xs text-gray-400 mt-1.5">Enter 换行 · Ctrl+Enter 添加条目 · Ctrl+B 粗体 · Ctrl+I 斜体</p>
+      <p className="text-sm text-gray-400 font-normal mt-2">Enter 换行 · Ctrl+Enter 添加 · Ctrl+B 粗体 · Ctrl+I 斜体</p>
     </div>
   );
 }

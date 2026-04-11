@@ -144,8 +144,8 @@ export default function MemberReport() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">My Weekly Report</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">My Weekly Report</h1>
+          <p className="text-base text-gray-500 font-semibold mt-1">
             {user?.member_name} · {user?.team_name}
           </p>
         </div>
@@ -156,7 +156,7 @@ export default function MemberReport() {
       <div className="flex gap-1 mb-5 border-b border-gray-200">
         <button
           onClick={() => setTab('edit')}
-          className={`px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 transition ${
+          className={`px-4 py-2 text-base font-semibold rounded-t-lg border-b-2 transition ${
             tab === 'edit'
               ? 'border-indigo-600 text-indigo-700 bg-indigo-50'
               : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -178,7 +178,7 @@ export default function MemberReport() {
 
       {/* Copied notification */}
       {copied && (
-        <div className="mb-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-2.5 text-sm flex items-center gap-2">
+        <div className="mb-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 text-base font-semibold flex items-center gap-2">
           <span>✓</span>
           <span>已将 <strong>{copied}</strong> 的内容复制到当前页面，请检查并保存。</span>
         </div>
@@ -188,7 +188,7 @@ export default function MemberReport() {
       {tab === 'edit' && (
         <>
           {/* Status bar */}
-          <div className={`rounded-lg px-4 py-2.5 mb-5 flex items-center justify-between text-sm ${
+          <div className={`rounded-xl px-5 py-3 mb-5 flex items-center justify-between text-base font-semibold ${
             isSubmitted ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
                         : 'bg-amber-50 border border-amber-200 text-amber-700'
           }`}>
@@ -196,10 +196,10 @@ export default function MemberReport() {
               Status: <strong>{isSubmitted ? 'Submitted' : 'Draft'}</strong>
               {' · '}{totalItems} item{totalItems !== 1 ? 's' : ''} total
             </span>
-            {saveState === 'idle'   && isDirty.current && <span className="text-gray-400 text-xs">稍后自动保存…</span>}
-            {saveState === 'saving' && <span className="text-gray-500 text-xs">保存中…</span>}
-            {saveState === 'saved'  && <span className="text-emerald-600 font-medium text-xs">✓ 已自动保存</span>}
-            {saveState === 'error'  && <span className="text-red-600 font-medium text-xs">✗ 保存失败</span>}
+            {saveState === 'idle'   && isDirty.current && <span className="text-gray-400 text-sm font-medium">稍后自动保存…</span>}
+            {saveState === 'saving' && <span className="text-gray-500 text-sm font-medium">保存中…</span>}
+            {saveState === 'saved'  && <span className="text-emerald-600 text-sm font-semibold">✓ 已自动保存</span>}
+            {saveState === 'error'  && <span className="text-red-600 text-sm font-semibold">✗ 保存失败</span>}
           </div>
 
           {loading ? (
@@ -219,25 +219,25 @@ export default function MemberReport() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3 mt-4 justify-end">
+              <div className="flex gap-3 mt-5 justify-end">
                 <button
                   onClick={() => handleSave('draft')}
                   disabled={saveState === 'saving'}
-                  className="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 text-sm font-medium transition disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-xl border-2 border-gray-300 text-gray-700 hover:bg-gray-100 text-base font-semibold transition disabled:opacity-50"
                 >
                   Save Draft
                 </button>
                 <button
                   onClick={() => handleSave('submitted')}
                   disabled={saveState === 'saving' || isSubmitted}
-                  className="px-5 py-2 rounded-lg bg-indigo-700 hover:bg-indigo-600 text-white text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2.5 rounded-xl bg-indigo-700 hover:bg-indigo-600 text-white text-base font-bold transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitted ? '✓ Submitted' : 'Submit Report'}
                 </button>
               </div>
 
               {isSubmitted && (
-                <p className="text-xs text-gray-400 text-right mt-2">
+                <p className="text-sm text-gray-400 font-medium text-right mt-2">
                   Report submitted. You can still edit and re-submit.
                 </p>
               )}
@@ -269,18 +269,18 @@ export default function MemberReport() {
                   >
                     {/* Row header */}
                     <div
-                      className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition"
+                      className="flex items-center gap-3 px-5 py-4 cursor-pointer hover:bg-gray-50 transition"
                       onClick={() => setExpanded(isExpanded ? null : r.week)}
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-semibold text-gray-800 text-sm">{r.week}</span>
+                          <span className="font-bold text-gray-800 text-base">{r.week}</span>
                           {isCurrentWeek && (
-                            <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium">
+                            <span className="text-sm bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full font-semibold">
                               当前周
                             </span>
                           )}
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                          <span className={`text-sm px-2.5 py-0.5 rounded-full font-semibold ${
                             r.status === 'submitted'
                               ? 'bg-emerald-100 text-emerald-700'
                               : 'bg-amber-100 text-amber-700'
@@ -288,18 +288,18 @@ export default function MemberReport() {
                             {r.status === 'submitted' ? '✓ Submitted' : '◌ Draft'}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-400 mt-0.5">{itemCount} 条内容</p>
+                        <p className="text-sm text-gray-400 font-medium mt-0.5">{itemCount} 条内容</p>
                       </div>
 
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <button
                           onClick={e => { e.stopPropagation(); copyFromHistory(r); }}
-                          className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition"
+                          className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition"
                           title="复制这周的内容到当前周编辑页"
                         >
                           {isCurrentWeek ? '加载到编辑页' : '复制到当前周'}
                         </button>
-                        <span className="text-gray-400 text-xs">{isExpanded ? '▲' : '▼'}</span>
+                        <span className="text-gray-400 text-sm">{isExpanded ? '▲' : '▼'}</span>
                       </div>
                     </div>
 

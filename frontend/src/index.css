@@ -3,7 +3,17 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    font-size: 16px;
+  }
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply bg-gray-50 text-gray-900 antialiased font-sans;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  input, textarea, select, button {
+    font-family: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
   }
 }
