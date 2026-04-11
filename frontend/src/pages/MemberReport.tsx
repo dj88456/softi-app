@@ -180,7 +180,7 @@ export default function MemberReport() {
       {copied && (
         <div className="mb-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 text-base font-semibold flex items-center gap-2">
           <span>✓</span>
-          <span>已将 <strong>{copied}</strong> 的内容复制到当前页面，请检查并保存。</span>
+          <span>Content from <strong>{copied}</strong> copied to the current week. Review and save.</span>
         </div>
       )}
 
@@ -196,10 +196,10 @@ export default function MemberReport() {
               Status: <strong>{isSubmitted ? 'Submitted' : 'Draft'}</strong>
               {' · '}{totalItems} item{totalItems !== 1 ? 's' : ''} total
             </span>
-            {saveState === 'idle'   && isDirty.current && <span className="text-gray-400 text-sm font-medium">稍后自动保存…</span>}
-            {saveState === 'saving' && <span className="text-gray-500 text-sm font-medium">保存中…</span>}
-            {saveState === 'saved'  && <span className="text-emerald-600 text-sm font-semibold">✓ 已自动保存</span>}
-            {saveState === 'error'  && <span className="text-red-600 text-sm font-semibold">✗ 保存失败</span>}
+            {saveState === 'idle'   && isDirty.current && <span className="text-gray-400 text-sm font-medium">Auto-saving…</span>}
+            {saveState === 'saving' && <span className="text-gray-500 text-sm font-medium">Saving…</span>}
+            {saveState === 'saved'  && <span className="text-emerald-600 text-sm font-semibold">✓ Auto-saved</span>}
+            {saveState === 'error'  && <span className="text-red-600 text-sm font-semibold">✗ Save failed</span>}
           </div>
 
           {loading ? (
@@ -277,7 +277,7 @@ export default function MemberReport() {
                           <span className="font-bold text-gray-800 text-base">{r.week}</span>
                           {isCurrentWeek && (
                             <span className="text-sm bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full font-semibold">
-                              当前周
+                              Current week
                             </span>
                           )}
                           <span className={`text-sm px-2.5 py-0.5 rounded-full font-semibold ${
@@ -288,16 +288,16 @@ export default function MemberReport() {
                             {r.status === 'submitted' ? '✓ Submitted' : '◌ Draft'}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-400 font-medium mt-0.5">{itemCount} 条内容</p>
+                        <p className="text-sm text-gray-400 font-medium mt-0.5">{itemCount} item{itemCount !== 1 ? 's' : ''}</p>
                       </div>
 
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <button
                           onClick={e => { e.stopPropagation(); copyFromHistory(r); }}
                           className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition"
-                          title="复制这周的内容到当前周编辑页"
+                          title="Copy this week's content to the current week"
                         >
-                          {isCurrentWeek ? '加载到编辑页' : '复制到当前周'}
+                          {isCurrentWeek ? 'Load to editor' : 'Copy to current week'}
                         </button>
                         <span className="text-gray-400 text-sm">{isExpanded ? '▲' : '▼'}</span>
                       </div>
@@ -320,7 +320,7 @@ export default function MemberReport() {
                             onClick={() => copyFromHistory(r)}
                             className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition"
                           >
-                            {isCurrentWeek ? '加载到编辑页' : `一键复制到当前周 (${week})`}
+                            {isCurrentWeek ? 'Load to editor' : `Copy to current week (${week})`}
                           </button>
                         </div>
                       </div>

@@ -18,15 +18,15 @@ type ToolbarAction =
   | { type: 'wrap';   before: string; after: string };
 
 const TOOLBAR: { label: string; title: string; style?: React.CSSProperties; action: ToolbarAction }[] = [
-  { label: '•',  title: '项目符号',  action: { type: 'prefix', text: '• '  } },
-  { label: '○',  title: '空心圆点',  action: { type: 'prefix', text: '○ '  } },
-  { label: '–',  title: '短横线',    action: { type: 'prefix', text: '– '  } },
-  { label: '→',  title: '箭头',      action: { type: 'insert', text: '→ '  } },
-  { label: '✓',  title: '完成标记',  action: { type: 'insert', text: '✓ '  } },
-  { label: '⚠',  title: '警告',      action: { type: 'insert', text: '⚠ '  } },
-  { label: 'B',  title: '粗体 (Ctrl+B)', style: { fontWeight: 'bold' },
+  { label: '•',  title: 'Bullet',        action: { type: 'prefix', text: '• '  } },
+  { label: '○',  title: 'Hollow bullet', action: { type: 'prefix', text: '○ '  } },
+  { label: '–',  title: 'Dash',          action: { type: 'prefix', text: '– '  } },
+  { label: '→',  title: 'Arrow',         action: { type: 'insert', text: '→ '  } },
+  { label: '✓',  title: 'Checkmark',     action: { type: 'insert', text: '✓ '  } },
+  { label: '⚠',  title: 'Warning',       action: { type: 'insert', text: '⚠ '  } },
+  { label: 'B',  title: 'Bold (Ctrl+B)', style: { fontWeight: 'bold' },
     action: { type: 'wrap', before: '**', after: '**' } },
-  { label: 'I',  title: '斜体 (Ctrl+I)', style: { fontStyle: 'italic' },
+  { label: 'I',  title: 'Italic (Ctrl+I)', style: { fontStyle: 'italic' },
     action: { type: 'wrap', before: '_', after: '_' } },
 ];
 
@@ -332,7 +332,7 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
           + Add
         </button>
       </div>
-      <p className="text-sm text-gray-400 font-normal mt-2">Enter 换行 · Ctrl+Enter 添加 · Ctrl+B 粗体 · Ctrl+I 斜体</p>
+      <p className="text-sm text-gray-400 font-normal mt-2">Enter for new line · Ctrl+Enter to add · Ctrl+B bold · Ctrl+I italic</p>
     </div>
   );
 }
