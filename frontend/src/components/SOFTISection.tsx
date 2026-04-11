@@ -182,11 +182,21 @@ function RichTextInput({
 
   return (
     <div className={`relative rounded border bg-white focus-within:ring-1 focus-within:ring-indigo-400 focus-within:border-indigo-400 border-gray-200 transition ${className ?? ''}`}>
+      <textarea
+        ref={ref}
+        value={value}
+        rows={1}
+        onChange={e => onChange(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        placeholder={placeholder}
+        className="w-full resize-none overflow-hidden bg-transparent px-2.5 py-2 text-base focus:outline-none"
+      />
       {showToolbar && focused && (
-        <div className="absolute top-full left-0 mt-1 z-30 flex items-center gap-px px-1.5 py-0.5 bg-white border border-gray-200 rounded-lg shadow-md">
+        <div className="flex items-center gap-px px-1.5 py-0.5 border-t border-gray-100">
           {TOOLBAR.map((btn, i) => (
             <React.Fragment key={btn.label}>
-              {/* Separator before Bold */}
               {i === 6 && <span className="w-px h-3 bg-gray-200 mx-1 flex-shrink-0" />}
               <button
                 type="button"
@@ -204,17 +214,6 @@ function RichTextInput({
           ))}
         </div>
       )}
-      <textarea
-        ref={ref}
-        value={value}
-        rows={1}
-        onChange={e => onChange(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        placeholder={placeholder}
-        className="w-full resize-none overflow-hidden bg-transparent px-2.5 py-2 text-base focus:outline-none"
-      />
     </div>
   );
 }
