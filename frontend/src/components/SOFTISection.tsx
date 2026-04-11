@@ -182,11 +182,9 @@ function RichTextInput({
 
   return (
     <div className={`relative rounded border bg-white focus-within:ring-1 focus-within:ring-indigo-400 focus-within:border-indigo-400 border-gray-200 transition ${className ?? ''}`}>
-      {/* Inline toolbar — always rendered so height never changes, fades in/out via opacity */}
-      {showToolbar && (
-        <div className={`flex items-center gap-px px-1.5 py-0.5 border-b border-gray-100 transition-opacity duration-100 ${
-          focused ? 'opacity-100' : 'opacity-0 pointer-events-none select-none'
-        }`}>
+      {/* Toolbar — only rendered on Add input (showToolbar=false for existing items), shown when focused */}
+      {showToolbar && focused && (
+        <div className="flex items-center gap-px px-1.5 py-0.5 border-b border-gray-100">
           {TOOLBAR.map((btn, i) => (
             <React.Fragment key={btn.label}>
               {/* Separator before Bold */}
@@ -334,6 +332,7 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
             <RichTextInput
               value={item}
               onChange={v => editItem(i, v)}
+              showToolbar={false}
               className="flex-1"
             />
             <button
