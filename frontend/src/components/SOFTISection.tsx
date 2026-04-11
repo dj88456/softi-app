@@ -273,22 +273,15 @@ interface EditableProps {
 
 export function SOFTISectionEditable({ section, items, onChange, canReorder = false }: EditableProps) {
   const meta = SECTION_META[section];
-  const DEFAULT_DRAFT = '• ';
-  const [draft, setDraft] = useState(DEFAULT_DRAFT);
+  const [draft, setDraft] = useState('');
   const addRef = useRef<HTMLTextAreaElement>(null);
-
-  // Content beyond any leading bullet prefix
-  const draftContent = draft.replace(/^[•○–]\s*/, '').trim();
 
   function add() {
     const trimmed = draft.trim();
-    if (!trimmed || !draftContent) return;
+    if (!trimmed) return;
     onChange([...items, trimmed]);
-    setDraft(DEFAULT_DRAFT);
-    setTimeout(() => {
-      addRef.current?.focus();
-      addRef.current?.setSelectionRange(DEFAULT_DRAFT.length, DEFAULT_DRAFT.length);
-    }, 0);
+    setDraft('');
+    setTimeout(() => addRef.current?.focus(), 0);
   }
 
   function remove(i: number) { onChange(items.filter((_, idx) => idx !== i)); }
@@ -361,9 +354,9 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
         />
         <button
           onClick={add}
-          disabled={!draftContent}
+          disabled={!draft.trim()}
           className={`px-4 py-2 rounded-lg text-base font-semibold transition flex-shrink-0 ${
-            draftContent ? `${meta.badge} text-white hover:opacity-90` : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            draft.trim() ? `${meta.badge} text-white hover:opacity-90` : 'bg-gray-200 text-gray-400 cursor-not-allowed'
           }`}
         >
           + Add
