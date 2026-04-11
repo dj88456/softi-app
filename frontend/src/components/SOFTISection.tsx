@@ -182,9 +182,8 @@ function RichTextInput({
 
   return (
     <div className={`relative rounded border bg-white focus-within:ring-1 focus-within:ring-indigo-400 focus-within:border-indigo-400 border-gray-200 transition ${className ?? ''}`}>
-      {/* Toolbar — only rendered on Add input (showToolbar=false for existing items), shown when focused */}
       {showToolbar && focused && (
-        <div className="flex items-center gap-px px-1.5 py-0.5 border-b border-gray-100">
+        <div className="absolute top-full left-0 mt-1 z-30 flex items-center gap-px px-1.5 py-0.5 bg-white border border-gray-200 rounded-lg shadow-md">
           {TOOLBAR.map((btn, i) => (
             <React.Fragment key={btn.label}>
               {/* Separator before Bold */}
@@ -332,7 +331,6 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
             <RichTextInput
               value={item}
               onChange={v => editItem(i, v)}
-              showToolbar={false}
               className="flex-1"
             />
             <button
