@@ -149,6 +149,34 @@ function RichTextInput({
       if (e.key === 'b') { e.preventDefault(); applyFormat(ref.current!, { type: 'wrap', before: '**', after: '**' }, onChange); return; }
       if (e.key === 'i') { e.preventDefault(); applyFormat(ref.current!, { type: 'wrap', before: '_', after: '_' }, onChange); return; }
     }
+
+    // Auto-continue bullet prefix on Enter
+    if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
+      const ta = ref.current!;
+      const { value, selectionStart: ss } = ta;
+      const lineStart = value.lastIndexOf('\n', ss - 1) + 1;
+      const lineText = value.slice(lineStart, ss);
+      const matchedPrefix = ['• ', '○ ', '– '].find(p => lineText.startsWith(p));
+
+      if (matchedPrefix) {
+        e.preventDefault();
+        if (lineText === matchedPrefix) {
+          // Line is only the prefix — remove it (exit bullet mode)
+          const next = value.slice(0, lineStart) + value.slice(lineStart + matchedPrefix.length);
+          onChange(next);
+          requestAnimationFrame(() => { ta.setSelectionRange(lineStart, lineStart); ta.focus(); });
+        } else {
+          // Insert newline + same prefix
+          const insertion = '\n' + matchedPrefix;
+          const next = value.slice(0, ss) + insertion + value.slice(ss);
+          onChange(next);
+          const cur = ss + insertion.length;
+          requestAnimationFrame(() => { ta.setSelectionRange(cur, cur); ta.focus(); });
+        }
+        return;
+      }
+    }
+
     onKeyDown?.(e);
   }, [ref, onChange, onKeyDown]);
 
