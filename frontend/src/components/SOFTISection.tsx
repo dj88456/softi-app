@@ -123,6 +123,7 @@ interface RichTextInputProps {
   value: string;
   onChange: (v: string) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  onBlur?: () => void;
   placeholder?: string;
   className?: string;
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
@@ -130,7 +131,7 @@ interface RichTextInputProps {
 }
 
 function RichTextInput({
-  value, onChange, onKeyDown, placeholder, className, textareaRef, showToolbar = true,
+  value, onChange, onKeyDown, onBlur, placeholder, className, textareaRef, showToolbar = true,
 }: RichTextInputProps) {
   const internalRef = useRef<HTMLTextAreaElement>(null);
   const ref = textareaRef ?? internalRef;
@@ -189,7 +190,7 @@ function RichTextInput({
         onChange={e => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
+        onBlur={() => { setFocused(false); onBlur?.(); }}
         placeholder={placeholder}
         className="w-full resize-none overflow-hidden bg-transparent px-2.5 py-2 text-base focus:outline-none"
       />
@@ -348,6 +349,7 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
           value={draft}
           onChange={setDraft}
           onKeyDown={handleAddKeyDown}
+          onBlur={add}
           textareaRef={addRef}
           placeholder={`Add ${meta.label.toLowerCase()}…`}
           className="flex-1"
