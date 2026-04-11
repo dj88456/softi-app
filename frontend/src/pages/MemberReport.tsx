@@ -272,15 +272,13 @@ export default function MemberReport() {
                       </div>
 
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        {!isCurrentWeek && (
-                          <button
-                            onClick={e => { e.stopPropagation(); copyFromHistory(r); }}
-                            className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition"
-                            title="复制这周的内容到当前周"
-                          >
-                            复制到当前周
-                          </button>
-                        )}
+                        <button
+                          onClick={e => { e.stopPropagation(); copyFromHistory(r); }}
+                          className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition"
+                          title="复制这周的内容到当前周编辑页"
+                        >
+                          {isCurrentWeek ? '加载到编辑页' : '复制到当前周'}
+                        </button>
                         <span className="text-gray-400 text-xs">{isExpanded ? '▲' : '▼'}</span>
                       </div>
                     </div>
@@ -297,16 +295,14 @@ export default function MemberReport() {
                             />
                           ))}
                         </div>
-                        {!isCurrentWeek && (
-                          <div className="mt-3 flex justify-end">
-                            <button
-                              onClick={() => copyFromHistory(r)}
-                              className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition"
-                            >
-                              一键复制到当前周 ({week})
-                            </button>
-                          </div>
-                        )}
+                        <div className="mt-3 flex justify-end">
+                          <button
+                            onClick={() => copyFromHistory(r)}
+                            className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition"
+                          >
+                            {isCurrentWeek ? '加载到编辑页' : `一键复制到当前周 (${week})`}
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
