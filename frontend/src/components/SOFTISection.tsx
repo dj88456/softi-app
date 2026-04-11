@@ -184,7 +184,7 @@ function RichTextInput({
     <div className={`relative rounded border bg-white focus-within:ring-1 focus-within:ring-indigo-400 focus-within:border-indigo-400 border-gray-200 transition ${className ?? ''}`}>
       {/* Floating toolbar — absolute above the input, no layout shift */}
       {showToolbar && focused && (
-        <div className="absolute bottom-full left-0 mb-1.5 z-30 flex flex-wrap gap-0.5 px-2 py-1.5 bg-white border border-gray-200 rounded-lg shadow-lg">
+        <div className="absolute top-full left-0 mt-1.5 z-30 flex flex-wrap gap-0.5 px-2 py-1.5 bg-white border border-gray-200 rounded-lg shadow-lg">
           {TOOLBAR.map(btn => (
             <button
               key={btn.label}
