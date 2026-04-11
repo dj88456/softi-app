@@ -184,23 +184,26 @@ function RichTextInput({
     <div className={`relative rounded border bg-white focus-within:ring-1 focus-within:ring-indigo-400 focus-within:border-indigo-400 border-gray-200 transition ${className ?? ''}`}>
       {/* Inline toolbar — always rendered so height never changes, fades in/out via opacity */}
       {showToolbar && (
-        <div className={`flex flex-wrap gap-0.5 px-1.5 py-1 border-b border-gray-100 transition-opacity duration-100 ${
+        <div className={`flex items-center gap-px px-1.5 py-0.5 border-b border-gray-100 transition-opacity duration-100 ${
           focused ? 'opacity-100' : 'opacity-0 pointer-events-none select-none'
         }`}>
-          {TOOLBAR.map(btn => (
-            <button
-              key={btn.label}
-              type="button"
-              title={btn.title}
-              onMouseDown={e => {
-                e.preventDefault(); // keep textarea focus
-                if (ref.current) applyFormat(ref.current, btn.action, onChange);
-              }}
-              style={btn.style}
-              className="w-7 h-7 flex items-center justify-center rounded text-sm font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition select-none"
-            >
-              {btn.label}
-            </button>
+          {TOOLBAR.map((btn, i) => (
+            <React.Fragment key={btn.label}>
+              {/* Separator before Bold */}
+              {i === 6 && <span className="w-px h-3 bg-gray-200 mx-1 flex-shrink-0" />}
+              <button
+                type="button"
+                title={btn.title}
+                onMouseDown={e => {
+                  e.preventDefault();
+                  if (ref.current) applyFormat(ref.current, btn.action, onChange);
+                }}
+                style={btn.style}
+                className="w-5 h-5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition select-none flex-shrink-0"
+              >
+                {btn.label}
+              </button>
+            </React.Fragment>
           ))}
         </div>
       )}
