@@ -273,15 +273,22 @@ interface EditableProps {
 
 export function SOFTISectionEditable({ section, items, onChange, canReorder = false }: EditableProps) {
   const meta = SECTION_META[section];
-  const [draft, setDraft] = useState('');
+  const DEFAULT_DRAFT = '• ';
+  const [draft, setDraft] = useState(DEFAULT_DRAFT);
   const addRef = useRef<HTMLTextAreaElement>(null);
+
+  // Content beyond any leading bullet prefix
+  const draftContent = draft.replace(/^[•○–]\s*/, '').trim();
 
   function add() {
     const trimmed = draft.trim();
-    if (!trimmed) return;
+    if (!trimmed || !draftContent) return;
     onChange([...items, trimmed]);
-    setDraft('');
-    setTimeout(() => addRef.current?.focus(), 0);
+    setDraft(DEFAULT_DRAFT);
+    setTimeout(() => {
+      addRef.current?.focus();
+      addRef.current?.setSelectionRange(DEFAULT_DRAFT.length, DEFAULT_DRAFT.length);
+    }, 0);
   }
 
   function remove(i: number) { onChange(items.filter((_, idx) => idx !== i)); }
@@ -341,8 +348,9 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
         ))}
       </ul>
 
-      {/* Add new item */}
+      {/* Add new item — dot aligns with items above */}
       <div className="flex gap-2 items-start">
+        <span className={`mt-2.5 w-2 h-2 rounded-full flex-shrink-0 ${meta.badge} opacity-40`} />
         <RichTextInput
           value={draft}
           onChange={setDraft}
@@ -353,9 +361,9 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
         />
         <button
           onClick={add}
-          disabled={!draft.trim()}
+          disabled={!draftContent}
           className={`px-4 py-2 rounded-lg text-base font-semibold transition flex-shrink-0 ${
-            draft.trim() ? `${meta.badge} text-white hover:opacity-90` : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            draftContent ? `${meta.badge} text-white hover:opacity-90` : 'bg-gray-200 text-gray-400 cursor-not-allowed'
           }`}
         >
           + Add
