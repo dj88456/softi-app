@@ -139,28 +139,15 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
   }
 
   function handleAddKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       add();
     }
-    // Shift+Enter: default textarea behavior (newline)
+    // Plain Enter: default textarea newline behavior
   }
 
-  function handleItemKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>, i: number) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      // Insert a new empty item after this one
-      const next = [...items];
-      next.splice(i + 1, 0, '');
-      onChange(next);
-      // Focus new item — let React re-render first
-      setTimeout(() => {
-        const textareas = document.querySelectorAll<HTMLTextAreaElement>(
-          `[data-section="${section}"] textarea[data-item]`
-        );
-        textareas[i + 1]?.focus();
-      }, 0);
-    }
+  function handleItemKeyDown(_e: React.KeyboardEvent<HTMLTextAreaElement>, _i: number) {
+    // Plain Enter: default textarea newline behavior
   }
 
   return (
@@ -220,7 +207,7 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
           value={draft}
           onChange={setDraft}
           onKeyDown={handleAddKeyDown}
-          placeholder={`Add ${meta.label.toLowerCase()}… (Enter to add, Shift+Enter for new line)`}
+          placeholder={`Add ${meta.label.toLowerCase()}… (Ctrl+Enter to add)`}
           className="flex-1 bg-white border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400"
         />
         <button
@@ -235,7 +222,7 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
           + Add
         </button>
       </div>
-      <p className="text-xs text-gray-400 mt-1">Enter 添加条目 · Shift+Enter 换行</p>
+      <p className="text-xs text-gray-400 mt-1">Enter 换行 · Ctrl+Enter 添加条目</p>
     </div>
   );
 }
