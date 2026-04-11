@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useUser } from '../App';
 import { getReports, saveReport } from '../api';
@@ -33,6 +33,10 @@ export default function MemberReport() {
   const [loading, setLoading]   = useState(true);
   const [tab, setTab]           = useState<Tab>('edit');
 
+  // Track whether data changes came from the user (vs. initial load / copy)
+  const isDirty  = useRef(false);
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // History state
   const [history, setHistory]         = useState<WeeklyReport[]>([]);
   const [historyLoading, setHLoading] = useState(false);
@@ -51,6 +55,7 @@ export default function MemberReport() {
         setData({ successes: [], opportunities: [], failures: [], threats: [], issues: [] });
         setStatus('draft');
       }
+      isDirty.current = false; // loaded from server, not a user edit
     } catch (e) {
       console.error(e);
     } finally {
@@ -79,9 +84,22 @@ export default function MemberReport() {
     if (tab === 'history') loadHistory();
   }, [tab, loadHistory]);
 
-  function setSection(section: SectionKey, items: string[]) {
-    setData(prev => ({ ...prev, [section]: items }));
+  // Auto-save: 1.5s after last user edit, save as draft
+  useEffect(() => {
+    if (!isDirty.current) return;
     setSave('idle');
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    autoSaveTimer.current = setTimeout(() => {
+      isDirty.current = false;
+      handleSave('draft');
+    }, 1500);
+    return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
+
+  function setSection(section: SectionKey, items: string[]) {
+    isDirty.current = true;
+    setData(prev => ({ ...prev, [section]: items }));
   }
 
   async function handleSave(submitStatus: 'draft' | 'submitted') {
@@ -104,6 +122,7 @@ export default function MemberReport() {
   }
 
   function copyFromHistory(report: WeeklyReport) {
+    isDirty.current = true;
     setData({
       successes:     [...report.data.successes],
       opportunities: [...report.data.opportunities],
@@ -177,9 +196,10 @@ export default function MemberReport() {
               Status: <strong>{isSubmitted ? 'Submitted' : 'Draft'}</strong>
               {' · '}{totalItems} item{totalItems !== 1 ? 's' : ''} total
             </span>
-            {saveState === 'saved'  && <span className="text-emerald-600 font-medium">✓ Saved</span>}
-            {saveState === 'error'  && <span className="text-red-600 font-medium">✗ Error saving</span>}
-            {saveState === 'saving' && <span className="text-gray-500">Saving…</span>}
+            {saveState === 'idle'   && isDirty.current && <span className="text-gray-400 text-xs">稍后自动保存…</span>}
+            {saveState === 'saving' && <span className="text-gray-500 text-xs">保存中…</span>}
+            {saveState === 'saved'  && <span className="text-emerald-600 font-medium text-xs">✓ 已自动保存</span>}
+            {saveState === 'error'  && <span className="text-red-600 font-medium text-xs">✗ 保存失败</span>}
           </div>
 
           {loading ? (
