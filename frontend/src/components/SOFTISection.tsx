@@ -348,7 +348,7 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
           onChange={setDraft}
           onKeyDown={handleAddKeyDown}
           textareaRef={addRef}
-          placeholder={`Add ${meta.label.toLowerCase()}… (Ctrl+Enter to add)`}
+          placeholder={`Add ${meta.label.toLowerCase()}…`}
           className="flex-1"
         />
         <button
