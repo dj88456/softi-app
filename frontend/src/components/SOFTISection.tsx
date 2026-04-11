@@ -332,7 +332,6 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
           + Add
         </button>
       </div>
-      <p className="text-sm text-gray-400 font-normal mt-2">Enter for new line · Ctrl+Enter to add · Ctrl+B bold · Ctrl+I italic</p>
     </div>
   );
 }
