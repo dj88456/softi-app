@@ -113,17 +113,28 @@ function parseSOFTI(raw: string): SOFTIData {
 
     const items: string[] = [];
     let current: string[] = [];
+    // Tracks whether the current item was started by a plain-text (non-bullet) line.
+    // If true, solid bullets that follow are sub-items of that plain-text title.
+    // If false, each solid bullet starts its own item.
+    let currentStartedWithText = false;
 
     for (const line of sectionLines) {
       const stripped = stripLeading(line);
       if (stripped === '') {
         if (current.length > 0) { items.push(current.join('\n')); current = []; }
+        currentStartedWithText = false;
       } else if (isSolidBullet(line)) {
-        // Solid bullet → always starts a new item
-        if (current.length > 0) { items.push(current.join('\n')); current = []; }
-        current.push(stripped);
+        if (currentStartedWithText) {
+          // Plain-text title is already in current → solid bullets are its sub-lines
+          current.push(stripped);
+        } else {
+          // No plain-text title → each solid bullet is its own item
+          if (current.length > 0) { items.push(current.join('\n')); current = []; }
+          current.push(stripped);
+          currentStartedWithText = false;
+        }
       } else if (isHollowBullet(line)) {
-        // Hollow bullet → continuation of the current item
+        // Hollow bullet → always continuation of the current item
         if (current.length > 0) {
           current.push(stripped);
         } else if (items.length > 0) {
@@ -132,7 +143,10 @@ function parseSOFTI(raw: string): SOFTIData {
           current.push(stripped);
         }
       } else {
+        // Plain text line
+        if (current.length > 0) { items.push(current.join('\n')); current = []; }
         current.push(stripped);
+        currentStartedWithText = true;
       }
     }
     if (current.length > 0) items.push(current.join('\n'));
@@ -295,7 +309,15 @@ export default function TeamConsolidation() {
     const merged: SOFTIData = { successes: [], opportunities: [], failures: [], threats: [], issues: [] };
     const dropped: DroppedItem[] = [];
 
-    // Step 1: collect items, track learnings + duplicates
+    // Step 1: collect items per member, then assemble all sections in the same MEMBER_ORDER.
+    // This guarantees every section (opps, failures, threats, issues) follows the same member ordering as successes.
+    const perMember = new Map<string, SOFTIData>();
+    for (const report of memberReports) {
+      perMember.set(report.member_name ?? '', report.data);
+    }
+
+    // Iterate members in sorted order for each section
+    const seenItems = new Map<SectionKey, Set<string>>(SECTIONS.map(s => [s, new Set()]));
     for (const report of memberReports) {
       const memberName = report.member_name ?? '';
       for (const s of SECTIONS) {
@@ -304,9 +326,10 @@ export default function TeamConsolidation() {
             dropped.push({ member_name: memberName, section: s, item, reason: 'learnings' });
             continue;
           }
-          if (merged[s].includes(item)) {
+          if (seenItems.get(s)!.has(item)) {
             dropped.push({ member_name: memberName, section: s, item, reason: 'duplicate' });
           } else {
+            seenItems.get(s)!.add(item);
             merged[s].push(item);
           }
         }
