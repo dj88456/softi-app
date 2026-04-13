@@ -280,6 +280,7 @@ export default function TeamConsolidation() {
     for (const report of memberReports) {
       for (const s of SECTIONS) {
         for (const item of report.data[s] ?? []) {
+          if (/^learnings?/i.test(item.trim())) continue;
           if (!merged[s].includes(item)) merged[s].push(item);
         }
       }
