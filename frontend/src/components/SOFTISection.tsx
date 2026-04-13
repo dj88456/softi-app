@@ -10,66 +10,6 @@ const SECTION_META: Record<SectionKey, { label: string; letter: string; color: s
   issues:        { label: 'Issues',        letter: 'I', color: 'text-amber-700',   bg: 'bg-amber-50',    border: 'border-amber-200',   badge: 'bg-amber-500'   },
 };
 
-// ─── Formatting toolbar definitions ───────────────────────────────────────────
-
-type ToolbarAction =
-  | { type: 'prefix'; text: string }
-  | { type: 'insert'; text: string }
-  | { type: 'wrap';   before: string; after: string };
-
-const TOOLBAR: { label: string; title: string; style?: React.CSSProperties; action: ToolbarAction }[] = [
-  { label: '•',  title: 'Bullet',        action: { type: 'prefix', text: '• '  } },
-  { label: '○',  title: 'Hollow bullet', action: { type: 'prefix', text: '○ '  } },
-  { label: '–',  title: 'Dash',          action: { type: 'prefix', text: '– '  } },
-  { label: '→',  title: 'Arrow',         action: { type: 'insert', text: '→ '  } },
-  { label: '✓',  title: 'Checkmark',     action: { type: 'insert', text: '✓ '  } },
-  { label: '⚠',  title: 'Warning',       action: { type: 'insert', text: '⚠ '  } },
-  { label: 'B',  title: 'Bold (Ctrl+B)', style: { fontWeight: 'bold' },
-    action: { type: 'wrap', before: '**', after: '**' } },
-  { label: 'I',  title: 'Italic (Ctrl+I)', style: { fontStyle: 'italic' },
-    action: { type: 'wrap', before: '_', after: '_' } },
-];
-
-function applyFormat(
-  textarea: HTMLTextAreaElement,
-  action: ToolbarAction,
-  onChange: (v: string) => void,
-) {
-  const { value, selectionStart: ss, selectionEnd: se } = textarea;
-
-  if (action.type === 'insert') {
-    const next = value.slice(0, ss) + action.text + value.slice(se);
-    onChange(next);
-    const cur = ss + action.text.length;
-    requestAnimationFrame(() => { textarea.focus(); textarea.setSelectionRange(cur, cur); });
-
-  } else if (action.type === 'prefix') {
-    const lineStart = value.lastIndexOf('\n', ss - 1) + 1;
-    const lineText  = value.slice(lineStart, value.indexOf('\n', ss) === -1 ? value.length : value.indexOf('\n', ss));
-    // Toggle: if line already starts with this prefix, remove it
-    if (lineText.startsWith(action.text)) {
-      const next = value.slice(0, lineStart) + value.slice(lineStart + action.text.length);
-      onChange(next);
-      const off = -action.text.length;
-      requestAnimationFrame(() => { textarea.focus(); textarea.setSelectionRange(ss + off, se + off); });
-    } else {
-      const next = value.slice(0, lineStart) + action.text + value.slice(lineStart);
-      onChange(next);
-      const off = action.text.length;
-      requestAnimationFrame(() => { textarea.focus(); textarea.setSelectionRange(ss + off, se + off); });
-    }
-
-  } else if (action.type === 'wrap') {
-    const selected = value.slice(ss, se) || 'text';
-    const wrapped  = action.before + selected + action.after;
-    const next     = value.slice(0, ss) + wrapped + value.slice(se);
-    onChange(next);
-    requestAnimationFrame(() => {
-      textarea.focus();
-      textarea.setSelectionRange(ss + action.before.length, ss + action.before.length + selected.length);
-    });
-  }
-}
 
 // ─── Inline markdown renderer (for read-only display) ─────────────────────────
 
@@ -127,15 +67,13 @@ interface RichTextInputProps {
   placeholder?: string;
   className?: string;
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
-  showToolbar?: boolean;
 }
 
 function RichTextInput({
-  value, onChange, onKeyDown, onBlur, placeholder, className, textareaRef, showToolbar = true,
+  value, onChange, onKeyDown, onBlur, placeholder, className, textareaRef,
 }: RichTextInputProps) {
   const internalRef = useRef<HTMLTextAreaElement>(null);
   const ref = textareaRef ?? internalRef;
-  const [focused, setFocused] = useState(false);
 
   useEffect(() => {
     if (ref.current) {
@@ -145,12 +83,6 @@ function RichTextInput({
   }, [value, ref]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // Ctrl+B → bold, Ctrl+I → italic
-    if (e.ctrlKey || e.metaKey) {
-      if (e.key === 'b') { e.preventDefault(); applyFormat(ref.current!, { type: 'wrap', before: '**', after: '**' }, onChange); return; }
-      if (e.key === 'i') { e.preventDefault(); applyFormat(ref.current!, { type: 'wrap', before: '_', after: '_' }, onChange); return; }
-    }
-
     // Auto-continue bullet prefix on Enter
     if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
       const ta = ref.current!;
@@ -189,32 +121,10 @@ function RichTextInput({
         rows={1}
         onChange={e => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
-        onFocus={() => setFocused(true)}
-        onBlur={() => { setFocused(false); onBlur?.(); }}
+        onBlur={() => onBlur?.()}
         placeholder={placeholder}
         className="w-full resize-none overflow-hidden bg-transparent px-2.5 py-2 text-base focus:outline-none"
       />
-      {showToolbar && focused && (
-        <div className="flex items-center gap-px px-1.5 py-0.5 border-t border-gray-100">
-          {TOOLBAR.map((btn, i) => (
-            <React.Fragment key={btn.label}>
-              {i === 6 && <span className="w-px h-3 bg-gray-200 mx-1 flex-shrink-0" />}
-              <button
-                type="button"
-                title={btn.title}
-                onMouseDown={e => {
-                  e.preventDefault();
-                  if (ref.current) applyFormat(ref.current, btn.action, onChange);
-                }}
-                style={btn.style}
-                className="w-5 h-5 flex items-center justify-center rounded text-xs text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition select-none flex-shrink-0"
-              >
-                {btn.label}
-              </button>
-            </React.Fragment>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
