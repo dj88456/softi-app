@@ -42,8 +42,14 @@ function stripMarkers(text: string): string {
   return text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/_(.*?)_/g, '$1');
 }
 
+/** Replace bullet-prefix spaces with a narrow no-break space to reduce the gap in Word */
+function normalizeBulletSpace(text: string): string {
+  return text.replace(/^([•○–→✓⚠]) /, '$1\u202F');
+}
+
 /** Parse inline **bold** and _italic_ into TextRun children */
 function parseInline(text: string, size = 22): TextRun[] {
+  text = normalizeBulletSpace(text);
   const runs: TextRun[] = [];
   let i = 0;
   while (i < text.length) {
