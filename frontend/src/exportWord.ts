@@ -5,6 +5,7 @@ import {
   TextRun,
   AlignmentType,
   UnderlineType,
+  TabStopType,
   convertInchesToTwip,
 } from 'docx';
 import type { SOFTIData } from './types';
@@ -20,9 +21,10 @@ const SECTION_META = {
 type SectionKey = keyof typeof SECTION_META;
 const SECTIONS: SectionKey[] = ['successes', 'opportunities', 'failures', 'threats', 'issues'];
 
-// 1 pt = 20 twips, 1 inch = 1440 twips
-const PT  = 20;   // twips per point
-const IN  = 1440; // twips per inch
+// Bullet prefix characters the toolbar can insert
+const BULLET_RE = /^([•○–→✓⚠]) /;
+// Hanging indent for bullet lines: 0.2 inch = 288 twips
+const BULLET_INDENT = 288;
 
 /** Format ISO week as "April 6 to April 10, 2026" */
 function weekToDateRange(week: string): string {
@@ -42,14 +44,8 @@ function stripMarkers(text: string): string {
   return text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/_(.*?)_/g, '$1');
 }
 
-/** Replace bullet-prefix spaces with a narrow no-break space to reduce the gap in Word */
-function normalizeBulletSpace(text: string): string {
-  return text.replace(/^([•○–→✓⚠]) /, '$1\u202F');
-}
-
 /** Parse inline **bold** and _italic_ into TextRun children */
-function parseInline(text: string, size = 22): TextRun[] {
-  text = normalizeBulletSpace(text);
+function parseInline(text: string, size: number): TextRun[] {
   const runs: TextRun[] = [];
   let i = 0;
   while (i < text.length) {
@@ -77,6 +73,39 @@ function parseInline(text: string, size = 22): TextRun[] {
   return runs;
 }
 
+/**
+ * Build a Paragraph for one line of item text.
+ * If the line starts with a bullet prefix (•, –, →, etc.) we strip it from
+ * the text and use a hanging-indent + tab-stop to position it precisely,
+ * preventing Word from auto-applying its List Paragraph tab (which creates
+ * the oversized gap the user sees).
+ */
+function makeLineParagraph(
+  text: string,
+  size: number,
+  spacingAfter: number,
+  spacingBefore = 0,
+): Paragraph {
+  const match = BULLET_RE.exec(text);
+  if (match) {
+    const bulletChar = match[1];
+    const rest = text.slice(match[0].length); // text after "• "
+    return new Paragraph({
+      tabStops: [{ type: TabStopType.LEFT, position: BULLET_INDENT }],
+      indent: { left: BULLET_INDENT, hanging: BULLET_INDENT },
+      spacing: { before: spacingBefore, after: spacingAfter },
+      children: [
+        new TextRun({ text: bulletChar + '\t', size }),
+        ...parseInline(rest, size),
+      ],
+    });
+  }
+  return new Paragraph({
+    spacing: { before: spacingBefore, after: spacingAfter },
+    children: parseInline(text, size),
+  });
+}
+
 export async function exportToWord(params: {
   week: string;
   memberName: string;
@@ -86,11 +115,12 @@ export async function exportToWord(params: {
   const { week, memberName, teamName, data } = params;
   const dateRange = weekToDateRange(week);
 
-  // Font sizes (in half-points: 1pt = 2 units)
-  const SIZE_BODY     = 24; // 12pt
-  const SIZE_SUBHEAD  = 24; // 12pt
-  const SIZE_SECTION  = 36; // 18pt
-  const SIZE_META     = 22; // 11pt
+  const PT = 20;   // 1pt = 20 twips
+
+  const SIZE_BODY    = 24; // 12pt
+  const SIZE_SUBHEAD = 24; // 12pt bold
+  const SIZE_SECTION = 36; // 18pt
+  const SIZE_META    = 22; // 11pt
 
   const children: Paragraph[] = [];
 
@@ -116,7 +146,6 @@ export async function exportToWord(params: {
     const meta = SECTION_META[key];
     const items = data[key] ?? [];
 
-    // Section heading — bold + underlined, 18pt, space before
     children.push(
       new Paragraph({
         alignment: AlignmentType.LEFT,
@@ -148,15 +177,9 @@ export async function exportToWord(params: {
       if (lines.length === 0) continue;
 
       if (lines.length === 1) {
-        // Single line → plain paragraph with blank line after
-        children.push(
-          new Paragraph({
-            spacing: { after: 11 * PT },
-            children: parseInline(lines[0], SIZE_BODY),
-          }),
-        );
+        children.push(makeLineParagraph(lines[0], SIZE_BODY, 11 * PT));
       } else {
-        // Multi-line: first line = bold sub-heading (12pt), rest = plain paragraphs
+        // First line: bold sub-heading (strip any bullet markers if present)
         children.push(
           new Paragraph({
             spacing: { before: 2 * PT, after: 2 * PT },
@@ -167,12 +190,7 @@ export async function exportToWord(params: {
         );
         for (let i = 1; i < lines.length; i++) {
           const isLast = i === lines.length - 1;
-          children.push(
-            new Paragraph({
-              spacing: { after: isLast ? 11 * PT : 1 * PT },
-              children: parseInline(lines[i], SIZE_BODY),
-            }),
-          );
+          children.push(makeLineParagraph(lines[i], SIZE_BODY, isLast ? 11 * PT : 1 * PT));
         }
       }
     }
