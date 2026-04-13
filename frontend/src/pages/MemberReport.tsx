@@ -184,51 +184,57 @@ export default function MemberReport() {
 
   return (
     <div>
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">My Weekly Report</h1>
-          <p className="text-base text-gray-500 font-semibold mt-1">
-            {user?.member_name} · {user?.team_name}
-          </p>
+      {/* Header + tabs + calendar — single flex row */}
+      <div className="flex gap-6 border-b border-gray-200 mb-3">
+
+        {/* Left: title on top, tabs+copy pinned to bottom */}
+        <div className="flex-1 flex flex-col">
+          <div className="mt-[24px] mb-[24px]">
+            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight leading-tight">My Weekly Report</h1>
+            <p className="text-base text-gray-500 font-semibold mt-0.5">
+              {user?.member_name} · {user?.team_name}
+            </p>
+          </div>
+          <div className="flex-1" />
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setTab('edit')}
+              className={`px-4 py-2 text-base font-semibold rounded-t-lg border-b-2 transition ${
+                tab === 'edit'
+                  ? 'border-indigo-600 text-indigo-700 bg-indigo-50'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Edit Report
+            </button>
+            <button
+              onClick={() => setTab('history')}
+              className={`px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 transition ${
+                tab === 'history'
+                  ? 'border-indigo-600 text-indigo-700 bg-indigo-50'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              History
+            </button>
+            <div className="flex-1 flex justify-center pb-1">
+              <button
+                onClick={handleCopyLastWeek}
+                disabled={copyingLastWeek || loading}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                title={`Copy content from ${prevWeek(week)}`}
+              >
+                {copyingLastWeek ? 'Copying…' : `↑ Copy last week (${prevWeek(week)})`}
+              </button>
+            </div>
+          </div>
         </div>
-        <WeekSelector week={week} onChange={w => setSearchParams({ week: w })} />
-      </div>
 
-      {/* Copy Last Week — middle row */}
-      <div className="flex justify-center mb-4">
-        <button
-          onClick={handleCopyLastWeek}
-          disabled={copyingLastWeek || loading}
-          className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition disabled:opacity-40 disabled:cursor-not-allowed"
-          title={`Copy content from ${prevWeek(week)}`}
-        >
-          {copyingLastWeek ? 'Copying…' : `↑ Copy last week (${prevWeek(week)})`}
-        </button>
-      </div>
+        {/* Right: calendar */}
+        <div className="pb-px self-end">
+          <WeekSelector week={week} onChange={w => setSearchParams({ week: w })} />
+        </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 mb-5 border-b border-gray-200">
-        <button
-          onClick={() => setTab('edit')}
-          className={`px-4 py-2 text-base font-semibold rounded-t-lg border-b-2 transition ${
-            tab === 'edit'
-              ? 'border-indigo-600 text-indigo-700 bg-indigo-50'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          Edit Report
-        </button>
-        <button
-          onClick={() => setTab('history')}
-          className={`px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 transition ${
-            tab === 'history'
-              ? 'border-indigo-600 text-indigo-700 bg-indigo-50'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          History
-        </button>
       </div>
 
       {/* Copied notification */}
@@ -243,7 +249,7 @@ export default function MemberReport() {
       {tab === 'edit' && (
         <>
           {/* Status bar */}
-          <div className={`rounded-xl px-5 py-3 mb-5 flex items-center justify-between text-base font-semibold ${
+          <div className={`rounded-xl px-5 py-3 mb-3 flex items-center justify-between text-base font-semibold ${
             isSubmitted ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
                         : 'bg-amber-50 border border-amber-200 text-amber-700'
           }`}>
