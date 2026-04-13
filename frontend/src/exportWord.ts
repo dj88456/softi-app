@@ -94,8 +94,6 @@ function makeLineParagraph(
       spacing: { before: spacingBefore, after: spacingAfter },
       children: [
         new TextRun({ text: bulletChar, size }),
-        // Small-size space so the gap between bullet and text is visually tight
-        new TextRun({ text: ' ', size: Math.round(size * 0.35) }),
         ...parseInline(rest, size),
       ],
     });
