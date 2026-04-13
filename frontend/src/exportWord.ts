@@ -5,7 +5,6 @@ import {
   TextRun,
   AlignmentType,
   UnderlineType,
-  TabStopType,
   convertInchesToTwip,
 } from 'docx';
 import type { SOFTIData } from './types';
@@ -23,8 +22,8 @@ const SECTIONS: SectionKey[] = ['successes', 'opportunities', 'failures', 'threa
 
 // Bullet prefix characters the toolbar can insert
 const BULLET_RE = /^([•○–→✓⚠]) /;
-// Hanging indent for bullet lines: 0.2 inch = 288 twips
-const BULLET_INDENT = 288;
+// Hanging indent so wrapped lines align with text start (not bullet)
+const BULLET_INDENT = 180; // twips ≈ 0.125 inch
 
 /** Format ISO week as "April 6 to April 10, 2026" */
 function weekToDateRange(week: string): string {
@@ -91,11 +90,12 @@ function makeLineParagraph(
     const bulletChar = match[1];
     const rest = text.slice(match[0].length); // text after "• "
     return new Paragraph({
-      tabStops: [{ type: TabStopType.LEFT, position: BULLET_INDENT }],
       indent: { left: BULLET_INDENT, hanging: BULLET_INDENT },
       spacing: { before: spacingBefore, after: spacingAfter },
       children: [
-        new TextRun({ text: bulletChar + '\t', size }),
+        new TextRun({ text: bulletChar, size }),
+        // Small-size space so the gap between bullet and text is visually tight
+        new TextRun({ text: ' ', size: Math.round(size * 0.35) }),
         ...parseInline(rest, size),
       ],
     });
@@ -172,6 +172,11 @@ export async function exportToWord(params: {
       continue;
     }
 
+    const blank = () => new Paragraph({ spacing: { before: 0, after: 0 }, children: [] });
+
+    // Blank line before first item
+    children.push(blank());
+
     for (let idx = 0; idx < items.length; idx++) {
       const lines = items[idx].split('\n').filter(l => l.trim() !== '');
       if (lines.length === 0) continue;
@@ -193,11 +198,14 @@ export async function exportToWord(params: {
         }
       }
 
-      // Blank paragraph between items (not the last one)
+      // Blank paragraph between items
       if (idx < items.length - 1) {
-        children.push(new Paragraph({ spacing: { before: 0, after: 0 }, children: [] }));
+        children.push(blank());
       }
     }
+
+    // Blank line after last item
+    children.push(blank());
   }
 
   // ── Build & download ─────────────────────────────────────────────────────────
