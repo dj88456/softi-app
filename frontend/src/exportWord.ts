@@ -81,8 +81,9 @@ export async function exportToWord(params: {
 
   const PT = 20; // 1pt = 20 twips
 
-  const SIZE_BODY    = 24; // 12pt
-  const SIZE_SECTION = 36; // 18pt
+  const SIZE_BODY    = 24; // 12pt  — Calibri (Body)
+  const SIZE_SECTION = 28; // 14pt  — Arial
+  const SIZE_NA      = 20; // 10pt  — Arial
   const SIZE_META    = 22; // 11pt
 
   const blank = () => new Paragraph({ spacing: { before: 0, after: 0 }, children: [] });
@@ -120,6 +121,7 @@ export async function exportToWord(params: {
           new TextRun({
             text: meta.label,
             bold: true,
+            font: 'Arial',
             size: SIZE_SECTION,
             underline: { type: UnderlineType.SINGLE, color: '111827' },
             color: '111827',
@@ -132,7 +134,7 @@ export async function exportToWord(params: {
       children.push(
         new Paragraph({
           spacing: { after: 4 * PT },
-          children: [new TextRun({ text: 'n/a', size: SIZE_BODY, color: '111827' })],
+          children: [new TextRun({ text: 'n/a', font: 'Arial', size: SIZE_NA, color: '111827' })],
         }),
       );
       continue;
