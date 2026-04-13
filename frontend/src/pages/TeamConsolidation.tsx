@@ -360,6 +360,12 @@ export default function TeamConsolidation() {
     setSave('idle');
     setDroppedItems(dropped);
     if (dropped.length > 0) setShowDropped(true);
+
+    // Auto-save as draft immediately
+    if (user?.team_id) {
+      saveConsolidated({ team_id: user.team_id, week, data: merged, status: 'draft' })
+        .catch(e => console.error('Auto-save draft failed:', e));
+    }
   }
 
   function restoreDropped(d: DroppedItem) {

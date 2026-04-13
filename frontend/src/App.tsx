@@ -5,6 +5,7 @@ import Layout from './components/Layout';
 import Home from './pages/Home';
 import MemberReport from './pages/MemberReport';
 import TeamConsolidation from './pages/TeamConsolidation';
+import ConsolidationDrafts from './pages/ConsolidationDrafts';
 import SecretaryDashboard from './pages/SecretaryDashboard';
 import Admin from './pages/Admin';
 
@@ -51,6 +52,11 @@ export default function App() {
             <Route path="/consolidation" element={
               user?.role === 'leader'
                 ? <TeamConsolidation />
+                : <Navigate to="/" replace />
+            } />
+            <Route path="/drafts" element={
+              user?.role === 'leader'
+                ? <ConsolidationDrafts />
                 : <Navigate to="/" replace />
             } />
             <Route path="/dashboard" element={
