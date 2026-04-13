@@ -22,8 +22,6 @@ const SECTIONS: SectionKey[] = ['successes', 'opportunities', 'failures', 'threa
 
 // Bullet prefix characters the toolbar can insert
 const BULLET_RE = /^([•○–→✓⚠]) /;
-// Hanging indent so wrapped lines align with text start (not bullet)
-const BULLET_INDENT = 180; // twips ≈ 0.125 inch
 
 /** Format ISO week as "April 6 to April 10, 2026" */
 function weekToDateRange(week: string): string {
@@ -87,15 +85,11 @@ function makeLineParagraph(
 ): Paragraph {
   const match = BULLET_RE.exec(text);
   if (match) {
-    const bulletChar = match[1];
-    const rest = text.slice(match[0].length); // text after "• "
+    const rest = text.slice(match[0].length); // strip typed bullet prefix
     return new Paragraph({
-      indent: { left: BULLET_INDENT, hanging: BULLET_INDENT },
+      bullet: { level: 0 },               // Word's native bullet + spacing
       spacing: { before: spacingBefore, after: spacingAfter },
-      children: [
-        new TextRun({ text: bulletChar, size }),
-        ...parseInline(rest, size),
-      ],
+      children: parseInline(rest, size),
     });
   }
   return new Paragraph({
