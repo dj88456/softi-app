@@ -55,7 +55,7 @@ function RenderText({ text }: { text: string }) {
               <span>{renderInline(line)}</span>
             </span>
           )}
-          {i === 0 && renderInline(line)}
+          {i === 0 && <span className="font-bold">{renderInline(line)}</span>}
         </React.Fragment>
       ))}
     </>
