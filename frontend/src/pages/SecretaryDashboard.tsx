@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getConsolidated, publishConsolidated } from '../api';
-import { getCurrentWeek } from '../utils';
+import { getCurrentWeek, prevWeek } from '../utils';
 import type { ConsolidatedReport } from '../types';
 import WeekSelector from '../components/WeekSelector';
 import { SOFTISectionReadOnly } from '../components/SOFTISection';
@@ -13,7 +13,7 @@ type Tab = 'submitted' | 'published';
 
 export default function SecretaryDashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const week = searchParams.get('week') || getCurrentWeek();
+  const week = searchParams.get('week') || prevWeek(getCurrentWeek());
 
   const [reports, setReports]     = useState<ConsolidatedReport[]>([]);
   const [loading, setLoading]     = useState(true);

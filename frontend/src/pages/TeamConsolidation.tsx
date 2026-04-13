@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useUser } from '../App';
 import { getReports, getConsolidated, saveConsolidated, saveReport, deleteReport, getMembers } from '../api';
-import { getCurrentWeek } from '../utils';
+import { getCurrentWeek, prevWeek } from '../utils';
 import type { WeeklyReport, SOFTIData, Member } from '../types';
 import WeekSelector from '../components/WeekSelector';
 import { SOFTISectionEditable, SOFTISectionReadOnly } from '../components/SOFTISection';
@@ -142,7 +142,7 @@ function parseSOFTI(raw: string): SOFTIData {
 export default function TeamConsolidation() {
   const { user } = useUser();
   const [searchParams, setSearchParams] = useSearchParams();
-  const week = searchParams.get('week') || getCurrentWeek();
+  const week = searchParams.get('week') || prevWeek(getCurrentWeek());
 
   const [search, setSearch] = useState('');
   const [memberReports, setMemberReports] = useState<WeeklyReport[]>([]);
