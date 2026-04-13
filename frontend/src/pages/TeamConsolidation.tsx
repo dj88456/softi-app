@@ -21,6 +21,20 @@ function memberSortKey(name: string): number {
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
+interface DroppedItem {
+  member_name: string;
+  section: SectionKey;
+  item: string;
+  reason: 'learnings' | 'na_replaced' | 'duplicate' | 'doc_merged';
+}
+
+const DROPPED_REASON_LABEL: Record<DroppedItem['reason'], string> = {
+  learnings:   'Learnings (skipped)',
+  na_replaced: 'N/A (removed — section has real content)',
+  duplicate:   'Duplicate (already imported from another member)',
+  doc_merged:  'Merged into Documents Reviewed / Approved summary',
+};
+
 // ── Paste parser ───────────────────────────────────────────────────────────────
 
 // Match a line as a SOFTI section header — very permissive, handles:
@@ -145,6 +159,8 @@ export default function TeamConsolidation() {
   const week = searchParams.get('week') || prevWeek(getCurrentWeek());
 
   const [search, setSearch] = useState('');
+  const [droppedItems, setDroppedItems] = useState<DroppedItem[]>([]);
+  const [showDropped, setShowDropped] = useState(false);
   const [memberReports, setMemberReports] = useState<WeeklyReport[]>([]);
   const [allMembers,    setAllMembers]    = useState<Member[]>([]);
   const [consolidated, setConsolidated]   = useState<SOFTIData>({ successes: [], opportunities: [], failures: [], threats: [], issues: [] });
@@ -278,28 +294,50 @@ export default function TeamConsolidation() {
 
   function importAllReports() {
     const merged: SOFTIData = { successes: [], opportunities: [], failures: [], threats: [], issues: [] };
+    const dropped: DroppedItem[] = [];
+
+    // Step 1: collect items, track learnings + duplicates
     for (const report of memberReports) {
+      const memberName = report.member_name ?? '';
       for (const s of SECTIONS) {
         for (const item of report.data[s] ?? []) {
-          if (/^learnings?/i.test(item.trim())) continue;
-          if (!merged[s].includes(item)) merged[s].push(item);
+          if (/^learnings?/i.test(item.trim())) {
+            dropped.push({ member_name: memberName, section: s, item, reason: 'learnings' });
+            continue;
+          }
+          if (merged[s].includes(item)) {
+            dropped.push({ member_name: memberName, section: s, item, reason: 'duplicate' });
+          } else {
+            merged[s].push(item);
+          }
         }
       }
     }
 
-    // Per section: if there's any real content alongside N/A entries, drop the N/A
+    // Step 2: N/A — drop if section has real content
     for (const s of SECTIONS) {
       const hasReal = merged[s].some(item => !isNA(item));
       if (hasReal) {
+        const naItems = merged[s].filter(isNA);
+        naItems.forEach(item => dropped.push({ member_name: '(any)', section: s, item, reason: 'na_replaced' }));
         merged[s] = merged[s].filter(item => !isNA(item));
       } else {
+        // All N/A — keep just one
         const naItem = merged[s].find(isNA);
         merged[s] = naItem ? [naItem] : [];
       }
     }
 
-    // Merge all "Documents Reviewed" and "Documents Approved" items across members
-    // Collect content after the label, split by commas, deduplicate, then append at end
+    // Step 3: Merge Documents Reviewed / Approved
+    function extractAfter(text: string, pat: RegExp): string[] {
+      const after = text.replace(pat, '').replace(/^[:\s]+/, '').trim();
+      return after ? after.split(/[,;、]/).map(s => s.trim()).filter(Boolean) : [];
+    }
+    function dedup(entries: string[]): string[] {
+      const seen = new Set<string>();
+      return entries.filter(e => { const k = e.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
+    }
+
     const reviewedEntries: string[] = [];
     const approvedEntries: string[] = [];
 
@@ -307,26 +345,11 @@ export default function TeamConsolidation() {
       const hasReviewed = /documents?\s+reviewed/i.test(item);
       const hasApproved = /documents?\s+approved/i.test(item);
       if (!hasReviewed && !hasApproved) return true;
-
-      function extractAfter(text: string, pat: RegExp): string[] {
-        const after = text.replace(pat, '').replace(/^[:\s]+/, '').trim();
-        return after ? after.split(/[,;、]/).map(s => s.trim()).filter(Boolean) : [];
-      }
-
       if (hasReviewed) reviewedEntries.push(...extractAfter(item, /documents?\s+reviewed/i));
       if (hasApproved) approvedEntries.push(...extractAfter(item, /documents?\s+approved/i));
+      dropped.push({ member_name: '(merged)', section: 'successes', item, reason: 'doc_merged' });
       return false;
     });
-
-    function dedup(entries: string[]): string[] {
-      const seen = new Set<string>();
-      return entries.filter(e => {
-        const key = e.toLowerCase();
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-    }
 
     const dedupedReviewed = dedup(reviewedEntries);
     const dedupedApproved = dedup(approvedEntries);
@@ -335,6 +358,18 @@ export default function TeamConsolidation() {
 
     setConsolidated(merged);
     setSave('idle');
+    setDroppedItems(dropped);
+    if (dropped.length > 0) setShowDropped(true);
+  }
+
+  function restoreDropped(d: DroppedItem) {
+    setConsolidated(prev => ({
+      ...prev,
+      [d.section]: prev[d.section].includes(d.item)
+        ? prev[d.section]
+        : [...prev[d.section], d.item],
+    }));
+    setDroppedItems(prev => prev.filter(x => x !== d));
   }
 
   const submittedCount = memberReports.filter(r => r.status === 'submitted').length;
@@ -497,6 +532,15 @@ export default function TeamConsolidation() {
                       ↙ Import All
                     </button>
                   )}
+                  {droppedItems.length > 0 && !showDropped && (
+                    <button
+                      onClick={() => setShowDropped(true)}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-700 text-xs font-semibold transition"
+                      title="Review items filtered during import"
+                    >
+                      ⚠ {droppedItems.length} dropped
+                    </button>
+                  )}
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                     isSubmitted ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
                   }`}>
@@ -623,6 +667,57 @@ export default function TeamConsolidation() {
                   {pasteStatus === 'saving' ? 'Saving…' : pasteStatus === 'saved' ? '✓ Saved!' : pasteStatus === 'error' ? '✗ Error' : 'Save as Submitted'}
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Dropped-items review modal ── */}
+      {showDropped && droppedItems.length > 0 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
+
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Review Dropped Items</h2>
+                <p className="text-sm text-gray-400 mt-0.5">
+                  {droppedItems.length} item{droppedItems.length !== 1 ? 's' : ''} were filtered during import. Restore any you'd like to keep.
+                </p>
+              </div>
+              <button onClick={() => setShowDropped(false)} className="text-gray-400 hover:text-gray-600 text-xl font-bold">×</button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-2">
+              {droppedItems.map((d, idx) => (
+                <div key={idx} className="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">{d.section}</span>
+                      {d.member_name !== '(any)' && d.member_name !== '(merged)' && (
+                        <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">{d.member_name}</span>
+                      )}
+                      <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">{DROPPED_REASON_LABEL[d.reason]}</span>
+                    </div>
+                    <p className="text-sm text-gray-700 whitespace-pre-line">{d.item}</p>
+                  </div>
+                  <button
+                    onClick={() => restoreDropped(d)}
+                    className="flex-shrink-0 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition"
+                  >
+                    ↩ Restore
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+              <span className="text-sm text-gray-400">{droppedItems.length} item{droppedItems.length !== 1 ? 's' : ''} remaining</span>
+              <button
+                onClick={() => setShowDropped(false)}
+                className="px-5 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm font-semibold transition"
+              >
+                Done
+              </button>
             </div>
           </div>
         </div>
