@@ -326,12 +326,10 @@ export default function TeamConsolidation() {
       });
     }
 
-    const docParts: string[] = [];
     const dedupedReviewed = dedup(reviewedEntries);
     const dedupedApproved = dedup(approvedEntries);
-    if (dedupedReviewed.length > 0) docParts.push(`Documents Reviewed: ${dedupedReviewed.join(', ')}`);
-    if (dedupedApproved.length > 0) docParts.push(`Documents Approved: ${dedupedApproved.join(', ')}`);
-    if (docParts.length > 0) merged.successes.push(docParts.join('\n'));
+    if (dedupedReviewed.length > 0) merged.successes.push(`Documents Reviewed: ${dedupedReviewed.join(', ')}`);
+    if (dedupedApproved.length > 0) merged.successes.push(`Documents Approved: ${dedupedApproved.join(', ')}`);
 
     setConsolidated(merged);
     setSave('idle');
