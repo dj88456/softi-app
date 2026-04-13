@@ -284,17 +284,40 @@ export default function TeamConsolidation() {
         }
       }
     }
+
     // Per section: if there's any real content alongside N/A entries, drop the N/A
     for (const s of SECTIONS) {
       const hasReal = merged[s].some(item => !isNA(item));
       if (hasReal) {
         merged[s] = merged[s].filter(item => !isNA(item));
       } else {
-        // All N/A — keep just one
         const naItem = merged[s].find(isNA);
         merged[s] = naItem ? [naItem] : [];
       }
     }
+
+    // Merge all "Documents Reviewed" and "Documents Approved" items across members
+    // into a single summed item appended at the end of successes
+    let totalReviewed = 0, totalApproved = 0;
+    merged.successes = merged.successes.filter(item => {
+      const hasReviewed = /documents?\s+reviewed/i.test(item);
+      const hasApproved = /documents?\s+approved/i.test(item);
+      if (!hasReviewed && !hasApproved) return true;
+      if (hasReviewed) {
+        const m = item.match(/documents?\s+reviewed[:\s]*(\d+)|(\d+)\s*documents?\s+reviewed/i);
+        totalReviewed += m ? Number(m[1] ?? m[2]) : 0;
+      }
+      if (hasApproved) {
+        const m = item.match(/documents?\s+approved[:\s]*(\d+)|(\d+)\s*documents?\s+approved/i);
+        totalApproved += m ? Number(m[1] ?? m[2]) : 0;
+      }
+      return false;
+    });
+    const docParts: string[] = [];
+    if (totalReviewed > 0) docParts.push(`Documents Reviewed: ${totalReviewed}`);
+    if (totalApproved > 0) docParts.push(`Documents Approved: ${totalApproved}`);
+    if (docParts.length > 0) merged.successes.push(docParts.join(', '));
+
     setConsolidated(merged);
     setSave('idle');
   }
