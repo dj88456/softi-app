@@ -31,6 +31,7 @@ export default function MemberReport() {
   const [data, setData]         = useState<SOFTIData>({ ...EMPTY_SOFTI });
   const [status, setStatus]     = useState<'draft' | 'submitted'>('draft');
   const [saveState, setSave]    = useState<SaveState>('idle');
+  const [hasUnsaved, setHasUnsaved] = useState(false);
   const [loading, setLoading]   = useState(true);
   const [tab, setTab]           = useState<Tab>('edit');
 
@@ -62,7 +63,9 @@ export default function MemberReport() {
         setData({ successes: [], opportunities: [], failures: [], threats: [], issues: [] });
         setStatus('draft');
       }
-      isDirty.current = false; // loaded from server, not a user edit
+      isDirty.current = false;
+      setHasUnsaved(false);
+      setSave('idle');
     } catch (e) {
       console.error(e);
     } finally {
@@ -94,10 +97,8 @@ export default function MemberReport() {
   // Auto-save: 1.5s after last user edit, save as draft
   useEffect(() => {
     if (!isDirty.current) return;
-    setSave('idle');
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     autoSaveTimer.current = setTimeout(() => {
-      isDirty.current = false;
       handleSave('draft');
     }, 1500);
     return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
@@ -106,6 +107,7 @@ export default function MemberReport() {
 
   function setSection(section: SectionKey, items: string[]) {
     isDirty.current = true;
+    setHasUnsaved(true);
     setData(prev => ({ ...prev, [section]: items }));
   }
 
@@ -121,8 +123,9 @@ export default function MemberReport() {
         status: submitStatus,
       });
       setStatus(submitStatus);
+      isDirty.current = false;
+      setHasUnsaved(false);
       setSave('saved');
-      setTimeout(() => setSave('idle'), 2000);
     } catch {
       setSave('error');
     }
@@ -130,6 +133,7 @@ export default function MemberReport() {
 
   function copyFromHistory(report: WeeklyReport) {
     isDirty.current = true;
+    setHasUnsaved(true);
     setData({
       successes:     [...report.data.successes],
       opportunities: [...report.data.opportunities],
@@ -137,7 +141,6 @@ export default function MemberReport() {
       threats:       [...report.data.threats],
       issues:        [...report.data.issues],
     });
-    setSave('idle');
     setCopied(report.week);
     setTab('edit');
     setTimeout(() => setCopied(null), 3000);
@@ -251,10 +254,10 @@ export default function MemberReport() {
               Status: <strong>{isSubmitted ? 'Submitted' : 'Draft'}</strong>
               {' · '}{totalItems} item{totalItems !== 1 ? 's' : ''} total
             </span>
-            {saveState === 'idle'   && isDirty.current && <span className="text-gray-400 text-sm font-medium">Auto-saving…</span>}
-            {saveState === 'saving' && <span className="text-gray-500 text-sm font-medium">Saving…</span>}
-            {saveState === 'saved'  && <span className="text-emerald-600 text-sm font-semibold">✓ Auto-saved</span>}
-            {saveState === 'error'  && <span className="text-red-600 text-sm font-semibold">✗ Save failed</span>}
+            {saveState === 'saving'               && <span className="text-gray-500 text-sm font-medium">Saving…</span>}
+            {saveState === 'error'                && <span className="text-red-600 text-sm font-semibold">✗ Save failed</span>}
+            {saveState !== 'saving' && hasUnsaved  && <span className="text-gray-400 text-sm font-medium">Auto-saving…</span>}
+            {!hasUnsaved && saveState === 'saved'  && <span className="text-emerald-600 text-sm font-semibold">✓ Saved</span>}
           </div>
 
           {loading ? (
@@ -284,8 +287,8 @@ export default function MemberReport() {
                 </button>
                 <button
                   onClick={() => handleSave('draft')}
-                  disabled={saveState === 'saving'}
-                  className="px-6 py-2.5 rounded-xl border-2 border-gray-300 text-gray-700 hover:bg-gray-100 text-base font-semibold transition disabled:opacity-50"
+                  disabled={saveState === 'saving' || !hasUnsaved}
+                  className="px-6 py-2.5 rounded-xl border-2 border-gray-300 text-gray-700 hover:bg-gray-100 text-base font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Save Draft
                 </button>
