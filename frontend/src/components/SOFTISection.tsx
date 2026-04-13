@@ -211,6 +211,7 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
   const addRef = useRef<HTMLTextAreaElement>(null);
   const dragIdx = useRef<number | null>(null);
   const [dragOver, setDragOver] = useState<number | null>(null);
+  const [editingIdx, setEditingIdx] = useState<number | null>(null);
 
   // Successes always shows the input; other sections toggle it via "+ Add"
   const alwaysOpen = section === 'successes';
@@ -288,11 +289,22 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
               </div>
             )}
             <span className={`mt-2.5 w-2 h-2 rounded-full flex-shrink-0 ${meta.badge}`} />
-            <RichTextInput
-              value={item}
-              onChange={v => editItem(i, v)}
-              className="flex-1"
-            />
+            {editingIdx === i ? (
+              <RichTextInput
+                value={item}
+                onChange={v => editItem(i, v)}
+                onBlur={() => setEditingIdx(null)}
+                className="flex-1"
+              />
+            ) : (
+              <div
+                className="flex-1 text-base text-gray-700 cursor-text py-2 min-h-[2rem]"
+                onClick={() => setEditingIdx(i)}
+                title="Click to edit"
+              >
+                <RenderText text={item} highlight={highlight} />
+              </div>
+            )}
             <button
               onClick={() => remove(i)}
               className="text-red-400 hover:text-red-600 text-base font-bold px-1 mt-1.5 opacity-50 hover:opacity-100 transition"
