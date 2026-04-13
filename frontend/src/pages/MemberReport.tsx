@@ -183,21 +183,21 @@ export default function MemberReport() {
   const isSubmitted = status === 'submitted';
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div>
+    <div className="flex gap-6 items-start">
+
+      {/* ── Left column: title + tabs + content ── */}
+      <div className="flex-1 min-w-0">
+
+        {/* Title */}
+        <div className="mb-4">
           <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">My Weekly Report</h1>
           <p className="text-base text-gray-500 font-semibold mt-1">
             {user?.member_name} · {user?.team_name}
           </p>
         </div>
-        <WeekSelector week={week} onChange={w => setSearchParams({ week: w })} />
-      </div>
 
-      {/* Tabs + Copy Last Week */}
-      <div className="flex items-end justify-between mb-5 border-b border-gray-200">
-        <div className="flex gap-1">
+        {/* Tabs */}
+        <div className="flex gap-1 mb-5 border-b border-gray-200">
           <button
             onClick={() => setTab('edit')}
             className={`px-4 py-2 text-base font-semibold rounded-t-lg border-b-2 transition ${
@@ -219,20 +219,6 @@ export default function MemberReport() {
             History
           </button>
         </div>
-
-        <button
-          onClick={handleCopyLastWeek}
-          disabled={copyingLastWeek || loading}
-          className="mb-1.5 flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition disabled:opacity-40 disabled:cursor-not-allowed"
-          title={`Copy content from ${prevWeek(week)}`}
-        >
-          {copyingLastWeek ? (
-            <span className="text-gray-400">Copying…</span>
-          ) : (
-            <>↑ Copy last week ({prevWeek(week)})</>
-          )}
-        </button>
-      </div>
 
       {/* Copied notification */}
       {copied && (
@@ -397,6 +383,21 @@ export default function MemberReport() {
           )}
         </div>
       )}
+      </div>{/* end left column */}
+
+      {/* ── Right column: calendar + copy button ── */}
+      <div className="flex-shrink-0 flex flex-col gap-2">
+        <WeekSelector week={week} onChange={w => setSearchParams({ week: w })} />
+        <button
+          onClick={handleCopyLastWeek}
+          disabled={copyingLastWeek || loading}
+          className="w-full flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition disabled:opacity-40 disabled:cursor-not-allowed"
+          title={`Copy content from ${prevWeek(week)}`}
+        >
+          {copyingLastWeek ? 'Copying…' : `↑ Copy last week (${prevWeek(week)})`}
+        </button>
+      </div>
+
     </div>
   );
 }

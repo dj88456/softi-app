@@ -138,7 +138,7 @@ export default function WeekSelector({ week, onChange }: Props) {
       </div>
 
       {/* ── Calendar grid ── */}
-      <div className="px-2 pb-2 space-y-px">
+      <div className="px-2 pb-1.5 space-y-px">
         {rows.map((rowDays, ri) => (
           <div key={ri} className="grid grid-cols-7">
             {rowDays.map((d, ci) => {
@@ -166,7 +166,7 @@ export default function WeekSelector({ week, onChange }: Props) {
                 <div
                   key={ci}
                   onClick={() => onChange(dateToWeek(d))}
-                  className={`flex items-center justify-center h-7 cursor-pointer ${bandCls}`}
+                  className={`flex items-center justify-center h-6 cursor-pointer ${bandCls}`}
                 >
                   {isToday ? (
                     <span className="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center z-10">
