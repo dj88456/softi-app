@@ -28,6 +28,7 @@ export default function MemberReport() {
   const [searchParams, setSearchParams] = useSearchParams();
   const week = searchParams.get('week') || prevWeek(getCurrentWeek());
 
+  const [search, setSearch]     = useState('');
   const [data, setData]         = useState<SOFTIData>({ ...EMPTY_SOFTI });
   const [status, setStatus]     = useState<'draft' | 'submitted'>('draft');
   const [saveState, setSave]    = useState<SaveState>('idle');
@@ -230,8 +231,15 @@ export default function MemberReport() {
           </div>
         </div>
 
-        {/* Right: calendar */}
-        <div className="pb-px self-end">
+        {/* Right: search + calendar */}
+        <div className="pb-px self-end flex items-center gap-2">
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search…"
+            className="h-9 px-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-40 transition"
+          />
           <WeekSelector week={week} onChange={w => setSearchParams({ week: w })} />
         </div>
 
@@ -275,6 +283,7 @@ export default function MemberReport() {
                     section={s}
                     items={data[s]}
                     onChange={items => setSection(s, items)}
+                    highlight={search}
                   />
                 ))}
               </div>
@@ -380,6 +389,7 @@ export default function MemberReport() {
                               key={s}
                               section={s}
                               items={r.data[s] ?? []}
+                              highlight={search}
                             />
                           ))}
                         </div>

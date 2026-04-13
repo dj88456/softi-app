@@ -144,6 +144,7 @@ export default function TeamConsolidation() {
   const [searchParams, setSearchParams] = useSearchParams();
   const week = searchParams.get('week') || getCurrentWeek();
 
+  const [search, setSearch] = useState('');
   const [memberReports, setMemberReports] = useState<WeeklyReport[]>([]);
   const [allMembers,    setAllMembers]    = useState<Member[]>([]);
   const [consolidated, setConsolidated]   = useState<SOFTIData>({ successes: [], opportunities: [], failures: [], threats: [], issues: [] });
@@ -350,7 +351,16 @@ export default function TeamConsolidation() {
             {user?.team_name} · {user?.member_name}
           </p>
         </div>
-        <WeekSelector week={week} onChange={w => setSearchParams({ week: w })} />
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search…"
+            className="h-9 px-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-40 transition"
+          />
+          <WeekSelector week={week} onChange={w => setSearchParams({ week: w })} />
+        </div>
       </div>
 
       {loading ? (
@@ -453,6 +463,7 @@ export default function TeamConsolidation() {
                               section={s}
                               items={report.data[s]}
                               onCopy={item => copyToConsolidated(s, item)}
+                              highlight={search}
                             />
                           ))}
                         </div>
@@ -509,6 +520,7 @@ export default function TeamConsolidation() {
                     items={consolidated[s]}
                     onChange={items => setSection(s, items)}
                     canReorder
+                    highlight={search}
                   />
                 ))}
               </div>

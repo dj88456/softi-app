@@ -11,6 +11,20 @@ const SECTION_META: Record<SectionKey, { label: string; letter: string; color: s
 };
 
 
+// ─── Search highlight ─────────────────────────────────────────────────────────
+
+function applyHighlight(text: string, query: string): React.ReactNode[] {
+  if (!query.trim()) return [text];
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escaped})`, 'gi');
+  const parts = text.split(regex);
+  return parts.map((part, i) =>
+    regex.test(part)
+      ? <mark key={i} className="bg-yellow-200 text-yellow-900 rounded-sm px-0.5">{part}</mark>
+      : part
+  );
+}
+
 // ─── Inline markdown renderer (for read-only display) ─────────────────────────
 
 function renderInline(text: string): React.ReactNode[] {
@@ -43,8 +57,10 @@ function renderInline(text: string): React.ReactNode[] {
   return parts;
 }
 
-function RenderText({ text }: { text: string }) {
+function RenderText({ text, highlight }: { text: string; highlight?: string }) {
   const lines = text.split('\n');
+  const render = (line: string) =>
+    highlight ? applyHighlight(line, highlight) : renderInline(line);
   return (
     <>
       {lines.map((line, i) => (
@@ -52,10 +68,10 @@ function RenderText({ text }: { text: string }) {
           {i > 0 && (
             <span className="flex items-start gap-1 mt-0.5">
               <span className="text-gray-400 flex-shrink-0 leading-snug">○</span>
-              <span>{renderInline(line)}</span>
+              <span>{render(line)}</span>
             </span>
           )}
-          {i === 0 && <span className="font-bold">{renderInline(line)}</span>}
+          {i === 0 && <span className="font-bold">{render(line)}</span>}
         </React.Fragment>
       ))}
     </>
@@ -140,9 +156,10 @@ interface ReadOnlyProps {
   section: SectionKey;
   items: string[];
   onCopy?: (item: string) => void;
+  highlight?: string;
 }
 
-export function SOFTISectionReadOnly({ section, items, onCopy }: ReadOnlyProps) {
+export function SOFTISectionReadOnly({ section, items, onCopy, highlight }: ReadOnlyProps) {
   const meta = SECTION_META[section];
   return (
     <div className={`rounded-xl border ${meta.border} ${meta.bg} p-4 mb-2`}>
@@ -159,7 +176,7 @@ export function SOFTISectionReadOnly({ section, items, onCopy }: ReadOnlyProps) 
             <li key={i} className="flex items-start gap-2 text-base text-gray-700 group">
               <span className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${meta.badge}`} />
               <span className="flex-1 font-medium">
-                <RenderText text={item} />
+                <RenderText text={item} highlight={highlight} />
               </span>
               {onCopy && (
                 <button
@@ -185,9 +202,10 @@ interface EditableProps {
   items: string[];
   onChange: (items: string[]) => void;
   canReorder?: boolean;
+  highlight?: string;
 }
 
-export function SOFTISectionEditable({ section, items, onChange, canReorder = false }: EditableProps) {
+export function SOFTISectionEditable({ section, items, onChange, canReorder = false, highlight }: EditableProps) {
   const meta = SECTION_META[section];
   const [draft, setDraft] = useState('');
   const addRef = useRef<HTMLTextAreaElement>(null);
@@ -247,8 +265,10 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
 
       {/* Existing items */}
       <ul className="space-y-2 mb-3">
-        {items.map((item, i) => (
-          <li key={i} className="flex items-start gap-2 group">
+        {items.map((item, i) => {
+          const isMatch = !!highlight?.trim() && item.toLowerCase().includes(highlight.toLowerCase());
+          return (
+          <li key={i} className={`flex items-start gap-2 group rounded-lg ${isMatch ? 'bg-yellow-50 ring-1 ring-yellow-300 px-1' : ''}`}>
             {canReorder && (
               <div className="flex flex-col gap-0.5 mt-2">
                 <button onClick={() => moveUp(i)}   disabled={i === 0}                 className="text-gray-400 hover:text-gray-600 disabled:opacity-20 text-sm leading-none" title="Move up">▲</button>
@@ -267,7 +287,8 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
               title="Remove"
             >×</button>
           </li>
-        ))}
+          );
+        })}
       </ul>
 
       {/* Add new item */}
