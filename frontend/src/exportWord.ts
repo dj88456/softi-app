@@ -81,7 +81,7 @@ export async function exportToWord(params: {
   const dateRange = weekToDateRange(week);
 
   // Font sizes (in half-points: 1pt = 2 units)
-  const SIZE_BODY     = 22; // 11pt
+  const SIZE_BODY     = 24; // 12pt
   const SIZE_SUBHEAD  = 24; // 12pt
   const SIZE_SECTION  = 36; // 18pt
   const SIZE_META     = 22; // 11pt
@@ -131,7 +131,7 @@ export async function exportToWord(params: {
       children.push(
         new Paragraph({
           spacing: { after: 4 * PT },
-          children: [new TextRun({ text: 'n/a', size: SIZE_BODY, color: '6b7280' })],
+          children: [new TextRun({ text: 'n/a', size: SIZE_BODY, color: '111827' })],
         }),
       );
       continue;
@@ -163,7 +163,7 @@ export async function exportToWord(params: {
           const isLast = i === lines.length - 1;
           children.push(
             new Paragraph({
-              spacing: { after: isLast ? 11 * PT : 2 * PT },
+              spacing: { after: isLast ? 11 * PT : 1 * PT },
               children: parseInline(lines[i], SIZE_BODY),
             }),
           );
