@@ -168,12 +168,11 @@ export async function exportToWord(params: {
         }),
       );
 
-      // Remaining lines: native Word bullet, no indentation
+      // Remaining lines: Word native bullet, strip typed prefix if present
       for (const line of lines.slice(1)) {
         children.push(
           new Paragraph({
             bullet: { level: 0 },
-            indent: { left: 0, hanging: 0 },
             spacing: { before: 0, after: 0 },
             children: parseInline(line.replace(BULLET_PREFIX_RE, ''), SIZE_BODY),
           }),
