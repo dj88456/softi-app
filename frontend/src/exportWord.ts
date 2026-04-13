@@ -6,8 +6,6 @@ import {
   AlignmentType,
   UnderlineType,
   convertInchesToTwip,
-  LevelFormat,
-  NumberFormat,
 } from 'docx';
 import type { SOFTIData } from './types';
 
@@ -144,17 +142,15 @@ export async function exportToWord(params: {
       if (lines.length === 0) continue;
 
       if (lines.length === 1) {
-        // Single line → bullet
+        // Single line → plain paragraph
         children.push(
           new Paragraph({
-            bullet: { level: 0 },
             spacing: { after: 2 * PT },
-            indent: { left: Math.round(0.25 * IN), hanging: Math.round(0.25 * IN) },
             children: parseInline(lines[0], SIZE_BODY),
           }),
         );
       } else {
-        // Multi-line: first line = bold sub-heading (12pt), rest = bullets
+        // Multi-line: first line = bold sub-heading (12pt), rest = plain paragraphs
         children.push(
           new Paragraph({
             spacing: { before: 6 * PT, after: 2 * PT },
@@ -166,9 +162,7 @@ export async function exportToWord(params: {
         for (let i = 1; i < lines.length; i++) {
           children.push(
             new Paragraph({
-              bullet: { level: 0 },
               spacing: { after: 2 * PT },
-              indent: { left: Math.round(0.25 * IN), hanging: Math.round(0.25 * IN) },
               children: parseInline(lines[i], SIZE_BODY),
             }),
           );
