@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useUser } from '../App';
 import { getReports, saveReport } from '../api';
+import { exportToWord } from '../exportWord';
 import { getCurrentWeek, prevWeek } from '../utils';
 import { EMPTY_SOFTI, type SOFTIData } from '../types';
 import WeekSelector from '../components/WeekSelector';
@@ -45,6 +46,9 @@ export default function MemberReport() {
 
   // Copy last week
   const [copyingLastWeek, setCopyingLastWeek] = useState(false);
+
+  // Export
+  const [exporting, setExporting] = useState(false);
 
   const loadReport = useCallback(async () => {
     if (!user?.member_id) return;
@@ -158,6 +162,20 @@ export default function MemberReport() {
     }
   }
 
+  async function handleExport() {
+    setExporting(true);
+    try {
+      await exportToWord({
+        week,
+        memberName: user?.member_name ?? 'Member',
+        teamName: user?.team_name ?? '',
+        data,
+      });
+    } finally {
+      setExporting(false);
+    }
+  }
+
   const totalItems = SECTIONS.reduce((sum, s) => sum + data[s].length, 0);
   const isSubmitted = status === 'submitted';
 
@@ -256,7 +274,14 @@ export default function MemberReport() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3 mt-5 justify-end">
+              <div className="flex gap-3 mt-5 justify-end flex-wrap">
+                <button
+                  onClick={handleExport}
+                  disabled={exporting || totalItems === 0}
+                  className="px-6 py-2.5 rounded-xl border-2 border-gray-300 text-gray-700 hover:bg-gray-100 text-base font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {exporting ? 'Exporting…' : '↓ Export to Word'}
+                </button>
                 <button
                   onClick={() => handleSave('draft')}
                   disabled={saveState === 'saving'}
