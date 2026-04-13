@@ -23,17 +23,17 @@ const SECTIONS: SectionKey[] = ['successes', 'opportunities', 'failures', 'threa
 // Strip any typed bullet prefix so we don't double-up with Word's native bullet
 const BULLET_PREFIX_RE = /^[•○–→✓⚠] /;
 
-/** Format ISO week as "April 6 to April 10, 2026" */
+/** Format ISO week as "April 6 to April 10, 2026" (Monday–Friday workdays) */
 function weekToDateRange(week: string): string {
   const [y, w] = week.split('-W').map(Number);
   const jan4 = new Date(y, 0, 4);
   const dow = jan4.getDay() || 7;
   const monday = new Date(jan4);
   monday.setDate(jan4.getDate() - dow + 1 + (w - 1) * 7);
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
+  const friday = new Date(monday);
+  friday.setDate(monday.getDate() + 4);
   const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-  return `${fmt(monday)} to ${fmt(sunday)}, ${sunday.getFullYear()}`;
+  return `${fmt(monday)} to ${fmt(friday)}, ${friday.getFullYear()}`;
 }
 
 /** Strip **bold** and _italic_ markers from a string */

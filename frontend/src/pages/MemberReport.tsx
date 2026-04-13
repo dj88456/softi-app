@@ -26,7 +26,7 @@ type Tab = 'edit' | 'history';
 export default function MemberReport() {
   const { user } = useUser();
   const [searchParams, setSearchParams] = useSearchParams();
-  const week = searchParams.get('week') || getCurrentWeek();
+  const week = searchParams.get('week') || prevWeek(getCurrentWeek());
 
   const [data, setData]         = useState<SOFTIData>({ ...EMPTY_SOFTI });
   const [status, setStatus]     = useState<'draft' | 'submitted'>('draft');

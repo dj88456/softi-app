@@ -32,8 +32,8 @@ export function getWeekDateRange(week: string): string {
   const dayOfWeek = jan4.getDay() || 7;
   const monday = new Date(jan4);
   monday.setDate(jan4.getDate() - dayOfWeek + 1 + (w - 1) * 7);
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
+  const friday = new Date(monday);
+  friday.setDate(monday.getDate() + 4);
   const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  return `${fmt(monday)} – ${fmt(sunday)}`;
+  return `${fmt(monday)} – ${fmt(friday)}`;
 }
