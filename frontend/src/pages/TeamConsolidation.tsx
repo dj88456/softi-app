@@ -297,26 +297,41 @@ export default function TeamConsolidation() {
     }
 
     // Merge all "Documents Reviewed" and "Documents Approved" items across members
-    // into a single summed item appended at the end of successes
-    let totalReviewed = 0, totalApproved = 0;
+    // Collect content after the label, split by commas, deduplicate, then append at end
+    const reviewedEntries: string[] = [];
+    const approvedEntries: string[] = [];
+
     merged.successes = merged.successes.filter(item => {
       const hasReviewed = /documents?\s+reviewed/i.test(item);
       const hasApproved = /documents?\s+approved/i.test(item);
       if (!hasReviewed && !hasApproved) return true;
-      if (hasReviewed) {
-        const m = item.match(/documents?\s+reviewed[:\s]*(\d+)|(\d+)\s*documents?\s+reviewed/i);
-        totalReviewed += m ? Number(m[1] ?? m[2]) : 0;
+
+      function extractAfter(text: string, pat: RegExp): string[] {
+        const after = text.replace(pat, '').replace(/^[:\s]+/, '').trim();
+        return after ? after.split(/[,;、]/).map(s => s.trim()).filter(Boolean) : [];
       }
-      if (hasApproved) {
-        const m = item.match(/documents?\s+approved[:\s]*(\d+)|(\d+)\s*documents?\s+approved/i);
-        totalApproved += m ? Number(m[1] ?? m[2]) : 0;
-      }
+
+      if (hasReviewed) reviewedEntries.push(...extractAfter(item, /documents?\s+reviewed/i));
+      if (hasApproved) approvedEntries.push(...extractAfter(item, /documents?\s+approved/i));
       return false;
     });
+
+    function dedup(entries: string[]): string[] {
+      const seen = new Set<string>();
+      return entries.filter(e => {
+        const key = e.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
     const docParts: string[] = [];
-    if (totalReviewed > 0) docParts.push(`Documents Reviewed: ${totalReviewed}`);
-    if (totalApproved > 0) docParts.push(`Documents Approved: ${totalApproved}`);
-    if (docParts.length > 0) merged.successes.push(docParts.join(', '));
+    const dedupedReviewed = dedup(reviewedEntries);
+    const dedupedApproved = dedup(approvedEntries);
+    if (dedupedReviewed.length > 0) docParts.push(`Documents Reviewed: ${dedupedReviewed.join(', ')}`);
+    if (dedupedApproved.length > 0) docParts.push(`Documents Approved: ${dedupedApproved.join(', ')}`);
+    if (docParts.length > 0) merged.successes.push(docParts.join('\n'));
 
     setConsolidated(merged);
     setSave('idle');
