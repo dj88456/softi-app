@@ -154,7 +154,7 @@ export function SOFTISectionReadOnly({ section, items, onCopy }: ReadOnlyProps) 
       {items.length === 0 ? (
         <p className="text-sm text-gray-400 italic font-normal">No entries</p>
       ) : (
-        <ul className="space-y-1.5">
+        <ul className="space-y-3">
           {items.map((item, i) => (
             <li key={i} className="flex items-start gap-2 text-base text-gray-700 group">
               <span className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${meta.badge}`} />
