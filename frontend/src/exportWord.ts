@@ -142,10 +142,10 @@ export async function exportToWord(params: {
       if (lines.length === 0) continue;
 
       if (lines.length === 1) {
-        // Single line → plain paragraph with blank line after
+        // Single line → plain paragraph with gap after
         children.push(
           new Paragraph({
-            spacing: { after: 11 * PT },
+            spacing: { after: 6 * PT },
             children: parseInline(lines[0], SIZE_BODY),
           }),
         );
@@ -163,7 +163,7 @@ export async function exportToWord(params: {
           const isLast = i === lines.length - 1;
           children.push(
             new Paragraph({
-              spacing: { after: isLast ? 11 * PT : 1 * PT },
+              spacing: { after: isLast ? 6 * PT : 1 * PT },
               children: parseInline(lines[i], SIZE_BODY),
             }),
           );
@@ -178,7 +178,7 @@ export async function exportToWord(params: {
       default: {
         document: {
           run: { font: 'Calibri', size: SIZE_BODY, color: '111827' },
-          paragraph: { spacing: { line: 276 } },
+          paragraph: { spacing: { line: 240 } },
         },
       },
     },
