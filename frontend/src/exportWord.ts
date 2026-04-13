@@ -142,10 +142,10 @@ export async function exportToWord(params: {
       if (lines.length === 0) continue;
 
       if (lines.length === 1) {
-        // Single line → plain paragraph
+        // Single line → plain paragraph with blank line after
         children.push(
           new Paragraph({
-            spacing: { after: 2 * PT },
+            spacing: { after: 11 * PT },
             children: parseInline(lines[0], SIZE_BODY),
           }),
         );
@@ -153,16 +153,17 @@ export async function exportToWord(params: {
         // Multi-line: first line = bold sub-heading (12pt), rest = plain paragraphs
         children.push(
           new Paragraph({
-            spacing: { before: 6 * PT, after: 2 * PT },
+            spacing: { before: 2 * PT, after: 2 * PT },
             children: [
               new TextRun({ text: stripMarkers(lines[0]), bold: true, size: SIZE_SUBHEAD, color: '111827' }),
             ],
           }),
         );
         for (let i = 1; i < lines.length; i++) {
+          const isLast = i === lines.length - 1;
           children.push(
             new Paragraph({
-              spacing: { after: 2 * PT },
+              spacing: { after: isLast ? 11 * PT : 2 * PT },
               children: parseInline(lines[i], SIZE_BODY),
             }),
           );
