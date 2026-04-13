@@ -130,7 +130,13 @@ export async function exportToWord(params: {
       }),
     );
 
-    if (items.length === 0) {
+    const isNAItem = (s: string) => {
+      const norm = s.trim().toLowerCase().replace(/[\s/]/g, '');
+      return norm === 'na' || norm === 'none' || norm === 'nil';
+    };
+    const allNA = items.length > 0 && items.every(isNAItem);
+
+    if (items.length === 0 || allNA) {
       children.push(
         new Paragraph({
           spacing: { after: 4 * PT },
