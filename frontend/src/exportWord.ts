@@ -20,8 +20,8 @@ const SECTION_META = {
 type SectionKey = keyof typeof SECTION_META;
 const SECTIONS: SectionKey[] = ['successes', 'opportunities', 'failures', 'threats', 'issues'];
 
-// Bullet prefix characters the toolbar can insert
-const BULLET_RE = /^([•○–→✓⚠]) /;
+// Strip any typed bullet prefix so we don't double-up with Word's native bullet
+const BULLET_PREFIX_RE = /^[•○–→✓⚠] /;
 
 /** Format ISO week as "April 6 to April 10, 2026" */
 function weekToDateRange(week: string): string {
@@ -36,7 +36,7 @@ function weekToDateRange(week: string): string {
   return `${fmt(monday)} to ${fmt(sunday)}, ${sunday.getFullYear()}`;
 }
 
-/** Strip **bold** and _italic_ markers */
+/** Strip **bold** and _italic_ markers from a string */
 function stripMarkers(text: string): string {
   return text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/_(.*?)_/g, '$1');
 }
@@ -70,34 +70,6 @@ function parseInline(text: string, size: number): TextRun[] {
   return runs;
 }
 
-/**
- * Build a Paragraph for one line of item text.
- * If the line starts with a bullet prefix (•, –, →, etc.) we strip it from
- * the text and use a hanging-indent + tab-stop to position it precisely,
- * preventing Word from auto-applying its List Paragraph tab (which creates
- * the oversized gap the user sees).
- */
-function makeLineParagraph(
-  text: string,
-  size: number,
-  spacingAfter: number,
-  spacingBefore = 0,
-): Paragraph {
-  const match = BULLET_RE.exec(text);
-  if (match) {
-    const rest = text.slice(match[0].length); // strip typed bullet prefix
-    return new Paragraph({
-      bullet: { level: 0 },               // Word's native bullet + spacing
-      spacing: { before: spacingBefore, after: spacingAfter },
-      children: parseInline(rest, size),
-    });
-  }
-  return new Paragraph({
-    spacing: { before: spacingBefore, after: spacingAfter },
-    children: parseInline(text, size),
-  });
-}
-
 export async function exportToWord(params: {
   week: string;
   memberName: string;
@@ -107,12 +79,13 @@ export async function exportToWord(params: {
   const { week, memberName, teamName, data } = params;
   const dateRange = weekToDateRange(week);
 
-  const PT = 20;   // 1pt = 20 twips
+  const PT = 20; // 1pt = 20 twips
 
   const SIZE_BODY    = 24; // 12pt
-  const SIZE_SUBHEAD = 24; // 12pt bold
   const SIZE_SECTION = 36; // 18pt
   const SIZE_META    = 22; // 11pt
+
+  const blank = () => new Paragraph({ spacing: { before: 0, after: 0 }, children: [] });
 
   const children: Paragraph[] = [];
 
@@ -138,6 +111,7 @@ export async function exportToWord(params: {
     const meta = SECTION_META[key];
     const items = data[key] ?? [];
 
+    // Section heading — bold underlined 18pt
     children.push(
       new Paragraph({
         alignment: AlignmentType.LEFT,
@@ -164,8 +138,6 @@ export async function exportToWord(params: {
       continue;
     }
 
-    const blank = () => new Paragraph({ spacing: { before: 0, after: 0 }, children: [] });
-
     // Blank line before first item
     children.push(blank());
 
@@ -173,24 +145,33 @@ export async function exportToWord(params: {
       const lines = items[idx].split('\n').filter(l => l.trim() !== '');
       if (lines.length === 0) continue;
 
-      if (lines.length === 1) {
-        children.push(makeLineParagraph(lines[0], SIZE_BODY, 0));
-      } else {
-        // First line: bold sub-heading
+      // First line: always bold, strip any typed bullet/marker prefix
+      children.push(
+        new Paragraph({
+          spacing: { before: 0, after: 0 },
+          children: [
+            new TextRun({
+              text: stripMarkers(lines[0].replace(BULLET_PREFIX_RE, '')),
+              bold: true,
+              size: SIZE_BODY,
+              color: '111827',
+            }),
+          ],
+        }),
+      );
+
+      // Remaining lines: Word native bullet, strip typed prefix if present
+      for (const line of lines.slice(1)) {
         children.push(
           new Paragraph({
+            bullet: { level: 0 },
             spacing: { before: 0, after: 0 },
-            children: [
-              new TextRun({ text: stripMarkers(lines[0]), bold: true, size: SIZE_SUBHEAD, color: '111827' }),
-            ],
+            children: parseInline(line.replace(BULLET_PREFIX_RE, ''), SIZE_BODY),
           }),
         );
-        for (const line of lines.slice(1)) {
-          children.push(makeLineParagraph(line, SIZE_BODY, 0));
-        }
       }
 
-      // Blank paragraph between items
+      // Blank line between items (not after the last one)
       if (idx < items.length - 1) {
         children.push(blank());
       }
