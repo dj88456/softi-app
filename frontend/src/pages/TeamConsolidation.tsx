@@ -114,25 +114,16 @@ function parseSOFTI(raw: string): SOFTIData {
     const items: string[] = [];
     let current: string[] = [];
 
-    // If the section has hollow bullets → mixed mode (solid = new item title)
-    // If only solid bullets → all solid bullets accumulate as one item (split by blank lines only)
-    const hasMixed = sectionLines.some(l => l.trim() !== '' && isHollowBullet(l));
-
     for (const line of sectionLines) {
       const stripped = stripLeading(line);
       if (stripped === '') {
         if (current.length > 0) { items.push(current.join('\n')); current = []; }
       } else if (isSolidBullet(line)) {
-        if (hasMixed) {
-          // Mixed mode: solid bullet = start of a new item
-          if (current.length > 0) { items.push(current.join('\n')); current = []; }
-          current.push(stripped);
-        } else {
-          // Only-solid mode: treat as a plain continuation line
-          current.push(stripped);
-        }
+        // Solid bullet → always starts a new item
+        if (current.length > 0) { items.push(current.join('\n')); current = []; }
+        current.push(stripped);
       } else if (isHollowBullet(line)) {
-        // Hollow bullet → continuation of current item
+        // Hollow bullet → continuation of the current item
         if (current.length > 0) {
           current.push(stripped);
         } else if (items.length > 0) {
