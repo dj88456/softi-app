@@ -6,6 +6,8 @@ import {
   AlignmentType,
   UnderlineType,
   convertInchesToTwip,
+  LevelFormat,
+  NumberFormat,
 } from 'docx';
 import type { SOFTIData } from './types';
 
@@ -20,6 +22,10 @@ const SECTION_META = {
 type SectionKey = keyof typeof SECTION_META;
 const SECTIONS: SectionKey[] = ['successes', 'opportunities', 'failures', 'threats', 'issues'];
 
+// 1 pt = 20 twips, 1 inch = 1440 twips
+const PT  = 20;   // twips per point
+const IN  = 1440; // twips per inch
+
 /** Format ISO week as "April 6 to April 10, 2026" */
 function weekToDateRange(week: string): string {
   const [y, w] = week.split('-W').map(Number);
@@ -33,7 +39,7 @@ function weekToDateRange(week: string): string {
   return `${fmt(monday)} to ${fmt(sunday)}, ${sunday.getFullYear()}`;
 }
 
-/** Strip **bold** and _italic_ markers from a string */
+/** Strip **bold** and _italic_ markers */
 function stripMarkers(text: string): string {
   return text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/_(.*?)_/g, '$1');
 }
@@ -76,21 +82,27 @@ export async function exportToWord(params: {
   const { week, memberName, teamName, data } = params;
   const dateRange = weekToDateRange(week);
 
+  // Font sizes (in half-points: 1pt = 2 units)
+  const SIZE_BODY     = 22; // 11pt
+  const SIZE_SUBHEAD  = 24; // 12pt
+  const SIZE_SECTION  = 36; // 18pt
+  const SIZE_META     = 22; // 11pt
+
   const children: Paragraph[] = [];
 
   // ── Document header ──────────────────────────────────────────────────────────
   children.push(
     new Paragraph({
-      spacing: { after: 60 },
+      spacing: { after: 2 * PT },
       children: [
-        new TextRun({ text: memberName, bold: true, size: 28, color: '111827' }),
-        new TextRun({ text: `  ·  ${teamName}`, size: 24, color: '6b7280' }),
+        new TextRun({ text: memberName, bold: true, size: SIZE_BODY + 4, color: '111827' }),
+        new TextRun({ text: `  ·  ${teamName}`, size: SIZE_META, color: '6b7280' }),
       ],
     }),
     new Paragraph({
-      spacing: { after: 400 },
+      spacing: { after: 16 * PT },
       children: [
-        new TextRun({ text: `SOFTI – ${dateRange}`, size: 24, color: '374151' }),
+        new TextRun({ text: `SOFTI – ${dateRange}`, size: SIZE_META, color: '374151' }),
       ],
     }),
   );
@@ -100,16 +112,16 @@ export async function exportToWord(params: {
     const meta = SECTION_META[key];
     const items = data[key] ?? [];
 
-    // Section heading — bold + underlined
+    // Section heading — bold + underlined, 18pt, space before
     children.push(
       new Paragraph({
         alignment: AlignmentType.LEFT,
-        spacing: { before: 320, after: 120 },
+        spacing: { before: 14 * PT, after: 4 * PT },
         children: [
           new TextRun({
             text: meta.label,
             bold: true,
-            size: 32,
+            size: SIZE_SECTION,
             underline: { type: UnderlineType.SINGLE, color: '111827' },
             color: '111827',
           }),
@@ -120,8 +132,8 @@ export async function exportToWord(params: {
     if (items.length === 0) {
       children.push(
         new Paragraph({
-          spacing: { after: 80 },
-          children: [new TextRun({ text: 'n/a', size: 22, color: '9ca3af' })],
+          spacing: { after: 4 * PT },
+          children: [new TextRun({ text: 'n/a', size: SIZE_BODY, color: '6b7280' })],
         }),
       );
       continue;
@@ -132,21 +144,22 @@ export async function exportToWord(params: {
       if (lines.length === 0) continue;
 
       if (lines.length === 1) {
-        // Single-line item → plain bullet
+        // Single line → bullet
         children.push(
           new Paragraph({
             bullet: { level: 0 },
-            spacing: { after: 60 },
-            children: parseInline(lines[0]),
+            spacing: { after: 2 * PT },
+            indent: { left: Math.round(0.25 * IN), hanging: Math.round(0.25 * IN) },
+            children: parseInline(lines[0], SIZE_BODY),
           }),
         );
       } else {
-        // Multi-line: first line = bold sub-heading, rest = bullets
+        // Multi-line: first line = bold sub-heading (12pt), rest = bullets
         children.push(
           new Paragraph({
-            spacing: { before: 120, after: 40 },
+            spacing: { before: 6 * PT, after: 2 * PT },
             children: [
-              new TextRun({ text: stripMarkers(lines[0]), bold: true, size: 22, color: '111827' }),
+              new TextRun({ text: stripMarkers(lines[0]), bold: true, size: SIZE_SUBHEAD, color: '111827' }),
             ],
           }),
         );
@@ -154,8 +167,9 @@ export async function exportToWord(params: {
           children.push(
             new Paragraph({
               bullet: { level: 0 },
-              spacing: { after: 60 },
-              children: parseInline(lines[i]),
+              spacing: { after: 2 * PT },
+              indent: { left: Math.round(0.25 * IN), hanging: Math.round(0.25 * IN) },
+              children: parseInline(lines[i], SIZE_BODY),
             }),
           );
         }
@@ -168,7 +182,7 @@ export async function exportToWord(params: {
     styles: {
       default: {
         document: {
-          run: { font: 'Calibri', size: 22, color: '111827' },
+          run: { font: 'Calibri', size: SIZE_BODY, color: '111827' },
           paragraph: { spacing: { line: 276 } },
         },
       },
@@ -178,10 +192,10 @@ export async function exportToWord(params: {
         properties: {
           page: {
             margin: {
-              top: convertInchesToTwip(1),
+              top:    convertInchesToTwip(1),
               bottom: convertInchesToTwip(1),
-              left: convertInchesToTwip(1.2),
-              right: convertInchesToTwip(1.2),
+              left:   convertInchesToTwip(1.25),
+              right:  convertInchesToTwip(1.25),
             },
           },
         },

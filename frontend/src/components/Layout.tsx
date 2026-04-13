@@ -16,7 +16,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex flex-col">
       {/* Nav Bar */}
       <header className="bg-indigo-700 text-white shadow-md">
-        <div className="max-w-7xl mx-auto px-5 py-3.5 flex items-center justify-between">
+        <div className="w-full px-8 py-3.5 flex items-center justify-between">
 
           {/* Left: Logo */}
           <Link to="/" className="flex items-center gap-2.5 flex-shrink-0">
@@ -68,7 +68,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Page Content */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-5 py-8">
+      <main className="flex-1 w-full px-8 py-8">
         {children}
       </main>
 
