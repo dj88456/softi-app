@@ -315,9 +315,6 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
       </div>
 
       {/* Existing items */}
-      {items.length === 0 && (
-        <p className="text-sm text-gray-400 italic font-normal mb-2">No entries yet. Add one below.</p>
-      )}
       <ul className="space-y-2 mb-3">
         {items.map((item, i) => (
           <li key={i} className="flex items-start gap-2 group">
