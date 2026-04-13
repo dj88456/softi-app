@@ -93,16 +93,9 @@ export async function exportToWord(params: {
   // ── Document header ──────────────────────────────────────────────────────────
   children.push(
     new Paragraph({
-      spacing: { after: 2 * PT },
-      children: [
-        new TextRun({ text: memberName, bold: true, size: SIZE_BODY + 4, color: '111827' }),
-        new TextRun({ text: `  ·  ${teamName}`, size: SIZE_META, color: '6b7280' }),
-      ],
-    }),
-    new Paragraph({
       spacing: { after: 16 * PT },
       children: [
-        new TextRun({ text: `SOFTI – ${dateRange}`, size: SIZE_META, color: '374151' }),
+        new TextRun({ text: `EA SOFTI - ${dateRange}`, bold: true, size: SIZE_BODY + 4, color: '111827' }),
       ],
     }),
   );
