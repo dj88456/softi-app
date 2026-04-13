@@ -112,46 +112,46 @@ export default function WeekSelector({ week, onChange }: Props) {
   return (
     <div ref={containerRef} className="relative select-none">
 
-      {/* Compact trigger — looks like the original week selector */}
-      <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl shadow-sm px-1 py-1">
+      {/* Compact trigger */}
+      <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl shadow-sm px-1.5 py-1.5">
         <button
           onClick={e => { e.stopPropagation(); handleWeekNav(prevWeek(week)); }}
-          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 transition"
+          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 text-lg transition"
         >‹</button>
 
         <button
           onClick={() => setOpen(o => !o)}
-          className="flex flex-col items-center px-2 py-0.5 rounded-lg hover:bg-gray-50 transition min-w-[140px]"
+          className="flex flex-col items-center px-3 py-1 rounded-lg hover:bg-gray-50 transition min-w-[180px]"
         >
-          <span className="text-xs font-bold text-gray-800">{formatWeek(week)}</span>
-          <span className="text-xs text-gray-400">{getWeekDateRange(week)}</span>
+          <span className="text-sm font-bold text-gray-800">{formatWeek(week)}</span>
+          <span className="text-sm text-gray-400">{getWeekDateRange(week)}</span>
         </button>
 
         <button
           onClick={e => { e.stopPropagation(); handleWeekNav(nextWeek(week)); }}
-          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 transition"
+          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 text-lg transition"
         >›</button>
       </div>
 
       {/* Dropdown calendar */}
       {open && (
-        <div className="absolute right-0 top-full mt-1 z-50 bg-white rounded-xl border border-gray-200 shadow-lg" style={{ width: 240 }}>
+        <div className="absolute right-0 top-full mt-1 z-50 bg-white rounded-xl border border-gray-200 shadow-lg" style={{ width: 300 }}>
 
           {/* Month nav */}
-          <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
+          <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100">
             <button onClick={prevMonth}
-              className="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-500 transition">‹</button>
-            <span className="text-xs font-bold text-gray-700">{MONTH_NAMES[viewMonth]} {viewYear}</span>
+              className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 text-gray-500 transition">‹</button>
+            <span className="text-sm font-bold text-gray-700">{MONTH_NAMES[viewMonth]} {viewYear}</span>
             <button onClick={nextMonth}
-              className="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-500 transition">›</button>
+              className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 text-gray-500 transition">›</button>
           </div>
 
           {/* Back to default */}
           {!isDefault && (
-            <div className="flex justify-center px-3 py-1 border-b border-gray-100">
+            <div className="flex justify-center px-3 py-1.5 border-b border-gray-100">
               <button
                 onClick={() => { onChange(defaultWeek); setOpen(false); }}
-                className="text-[10px] font-semibold text-indigo-500 hover:text-indigo-700 transition"
+                className="text-xs font-semibold text-indigo-500 hover:text-indigo-700 transition"
               >
                 ↩ Back to last week
               </button>
@@ -159,7 +159,7 @@ export default function WeekSelector({ week, onChange }: Props) {
           )}
 
           {/* Day headers */}
-          <div className="grid grid-cols-7 px-2 pt-1.5 mb-0.5">
+          <div className="grid grid-cols-7 px-3 pt-2 mb-1">
             {DAY_LABELS.map((lbl, i) => (
               <div key={lbl}
                 className={`text-center text-xs font-semibold ${i === 0 || i === 6 ? 'text-gray-300' : 'text-gray-400'}`}>
@@ -169,7 +169,7 @@ export default function WeekSelector({ week, onChange }: Props) {
           </div>
 
           {/* Calendar grid */}
-          <div className="px-2 pb-2 space-y-0.5">
+          <div className="px-3 pb-3 space-y-0.5">
             {grid.map((row, ri) => (
               <div key={ri} className="grid grid-cols-7">
                 {row.map((d, ci) => {
@@ -193,13 +193,13 @@ export default function WeekSelector({ week, onChange }: Props) {
 
                   return (
                     <div key={ci} onClick={() => handleDayClick(d)}
-                      className={`flex items-center justify-center h-6 cursor-pointer ${bandCls}`}>
+                      className={`flex items-center justify-center h-8 cursor-pointer ${bandCls}`}>
                       {isToday ? (
-                        <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center">
+                        <span className="w-7 h-7 rounded-full bg-indigo-600 text-white text-sm font-bold flex items-center justify-center">
                           {d.getDate()}
                         </span>
                       ) : (
-                        <span className={`text-xs ${textCls} hover:text-indigo-500 transition`}>
+                        <span className={`text-sm ${textCls} hover:text-indigo-500 transition`}>
                           {d.getDate()}
                         </span>
                       )}

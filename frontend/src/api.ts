@@ -36,6 +36,9 @@ export const getReports = (params: { week?: string; team_id?: number; member_id?
   return request<WeeklyReport[]>(`/api/reports?${q}`);
 };
 
+export const deleteReport = (member_id: number, week: string) =>
+  request<{ success: boolean }>(`/api/reports?member_id=${member_id}&week=${encodeURIComponent(week)}`, { method: 'DELETE' });
+
 export const saveReport = (report: {
   member_id: number;
   team_id: number;

@@ -97,6 +97,16 @@ app.get('/api/reports', (req, res) => {
   res.json(withName);
 });
 
+app.delete('/api/reports', async (req, res) => {
+  const { member_id, week } = req.query;
+  const mid = Number(member_id);
+  const idx = db.data.weekly_reports.findIndex(r => r.member_id === mid && r.week === week);
+  if (idx === -1) return res.status(404).json({ error: 'Not found' });
+  db.data.weekly_reports.splice(idx, 1);
+  await save();
+  res.json({ success: true });
+});
+
 app.post('/api/reports', async (req, res) => {
   const { member_id, team_id, week, data, status } = req.body;
   const { successes, opportunities, failures, threats, issues } = data;
