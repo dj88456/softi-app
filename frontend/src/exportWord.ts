@@ -168,15 +168,14 @@ export async function exportToWord(params: {
         }),
       );
 
-      // Remaining lines: plain bullet char, no list indentation
+      // Remaining lines: native Word bullet, no indentation
       for (const line of lines.slice(1)) {
         children.push(
           new Paragraph({
+            bullet: { level: 0 },
+            indent: { left: 0, hanging: 0 },
             spacing: { before: 0, after: 0 },
-            children: [
-              new TextRun({ text: '• ', size: SIZE_BODY, color: '111827' }),
-              ...parseInline(line.replace(BULLET_PREFIX_RE, ''), SIZE_BODY),
-            ],
+            children: parseInline(line.replace(BULLET_PREFIX_RE, ''), SIZE_BODY),
           }),
         );
       }
