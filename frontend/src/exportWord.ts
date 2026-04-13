@@ -172,26 +172,30 @@ export async function exportToWord(params: {
       continue;
     }
 
-    for (const item of items) {
-      const lines = item.split('\n').filter(l => l.trim() !== '');
+    for (let idx = 0; idx < items.length; idx++) {
+      const lines = items[idx].split('\n').filter(l => l.trim() !== '');
       if (lines.length === 0) continue;
 
       if (lines.length === 1) {
-        children.push(makeLineParagraph(lines[0], SIZE_BODY, 11 * PT));
+        children.push(makeLineParagraph(lines[0], SIZE_BODY, 0));
       } else {
-        // First line: bold sub-heading (strip any bullet markers if present)
+        // First line: bold sub-heading
         children.push(
           new Paragraph({
-            spacing: { before: 2 * PT, after: 2 * PT },
+            spacing: { before: 0, after: 0 },
             children: [
               new TextRun({ text: stripMarkers(lines[0]), bold: true, size: SIZE_SUBHEAD, color: '111827' }),
             ],
           }),
         );
-        for (let i = 1; i < lines.length; i++) {
-          const isLast = i === lines.length - 1;
-          children.push(makeLineParagraph(lines[i], SIZE_BODY, isLast ? 11 * PT : 1 * PT));
+        for (const line of lines.slice(1)) {
+          children.push(makeLineParagraph(line, SIZE_BODY, 0));
         }
+      }
+
+      // Blank paragraph between items (not the last one)
+      if (idx < items.length - 1) {
+        children.push(new Paragraph({ spacing: { before: 0, after: 0 }, children: [] }));
       }
     }
   }
@@ -202,7 +206,7 @@ export async function exportToWord(params: {
       default: {
         document: {
           run: { font: 'Calibri', size: SIZE_BODY, color: '111827' },
-          paragraph: { spacing: { line: 276 } },
+          paragraph: { spacing: { line: 240 } },
         },
       },
     },
