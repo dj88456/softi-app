@@ -209,6 +209,8 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
   const meta = SECTION_META[section];
   const [draft, setDraft] = useState('');
   const addRef = useRef<HTMLTextAreaElement>(null);
+  const dragIdx = useRef<number | null>(null);
+  const [dragOver, setDragOver] = useState<number | null>(null);
 
   // Successes always shows the input; other sections toggle it via "+ Add"
   const alwaysOpen = section === 'successes';
@@ -222,7 +224,7 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
   function add() {
     const trimmed = draft.trim();
     if (!trimmed) {
-      if (!alwaysOpen) setInputOpen(false); // hide if user blurred with nothing typed
+      if (!alwaysOpen) setInputOpen(false);
       return;
     }
     onChange([...items, trimmed]);
@@ -230,21 +232,11 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
     if (alwaysOpen) {
       setTimeout(() => addRef.current?.focus(), 0);
     } else {
-      setInputOpen(false); // hide after adding in collapsible sections
+      setInputOpen(false);
     }
   }
 
   function remove(i: number) { onChange(items.filter((_, idx) => idx !== i)); }
-
-  function moveUp(i: number) {
-    if (i === 0) return;
-    const next = [...items]; [next[i - 1], next[i]] = [next[i], next[i - 1]]; onChange(next);
-  }
-
-  function moveDown(i: number) {
-    if (i === items.length - 1) return;
-    const next = [...items]; [next[i], next[i + 1]] = [next[i + 1], next[i]]; onChange(next);
-  }
 
   function editItem(i: number, value: string) {
     const next = [...items]; next[i] = value; onChange(next);
@@ -252,6 +244,19 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
 
   function handleAddKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); add(); }
+  }
+
+  function handleDragStart(i: number) { dragIdx.current = i; }
+  function handleDragEnter(i: number) { setDragOver(i); }
+  function handleDragEnd() {
+    if (dragIdx.current !== null && dragOver !== null && dragIdx.current !== dragOver) {
+      const next = [...items];
+      const [moved] = next.splice(dragIdx.current, 1);
+      next.splice(dragOver, 0, moved);
+      onChange(next);
+    }
+    dragIdx.current = null;
+    setDragOver(null);
   }
 
   return (
@@ -268,11 +273,18 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
         {items.map((item, i) => {
           const isMatch = !!highlight?.trim() && item.toLowerCase().includes(highlight.toLowerCase());
           return (
-          <li key={i} className={`flex items-start gap-2 group rounded-lg ${isMatch ? 'bg-yellow-50 ring-1 ring-yellow-300 px-1' : ''}`}>
+          <li
+            key={i}
+            draggable={canReorder}
+            onDragStart={() => handleDragStart(i)}
+            onDragEnter={() => handleDragEnter(i)}
+            onDragOver={e => e.preventDefault()}
+            onDragEnd={handleDragEnd}
+            className={`flex items-start gap-2 group rounded-lg transition-colors ${isMatch ? 'bg-yellow-50 ring-1 ring-yellow-300 px-1' : ''} ${canReorder && dragOver === i ? 'bg-indigo-50 ring-1 ring-indigo-300' : ''}`}
+          >
             {canReorder && (
-              <div className="flex flex-col gap-0.5 mt-2">
-                <button onClick={() => moveUp(i)}   disabled={i === 0}                 className="text-gray-400 hover:text-gray-600 disabled:opacity-20 text-sm leading-none" title="Move up">▲</button>
-                <button onClick={() => moveDown(i)} disabled={i === items.length - 1} className="text-gray-400 hover:text-gray-600 disabled:opacity-20 text-sm leading-none" title="Move down">▼</button>
+              <div className="mt-2.5 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 flex-shrink-0 select-none" title="Drag to reorder">
+                ⠿
               </div>
             )}
             <span className={`mt-2.5 w-2 h-2 rounded-full flex-shrink-0 ${meta.badge}`} />

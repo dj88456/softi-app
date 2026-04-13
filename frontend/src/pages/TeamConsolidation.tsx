@@ -509,7 +509,7 @@ export default function TeamConsolidation() {
 
               <p className="text-xs text-gray-400 mb-4 bg-blue-50 border border-blue-100 rounded p-2">
                 Tip: Click <strong>+ Add</strong> next to any member bullet point to copy it here.
-                Use ▲▼ to reorder items.
+                Drag <strong>⠿</strong> to reorder items.
               </p>
 
               <div className="max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
