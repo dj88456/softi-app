@@ -353,8 +353,8 @@ export default function TeamConsolidation() {
 
     const dedupedReviewed = dedup(reviewedEntries);
     const dedupedApproved = dedup(approvedEntries);
-    if (dedupedReviewed.length > 0) merged.successes.push(`Documents Reviewed\n${dedupedReviewed.join(', ')}`);
-    if (dedupedApproved.length > 0) merged.successes.push(`Documents Approved\n${dedupedApproved.join(', ')}`);
+    if (dedupedReviewed.length > 0) merged.successes.push(`Documents Reviewed\n${dedupedReviewed.join('\n')}`);
+    if (dedupedApproved.length > 0) merged.successes.push(`Documents Approved\n${dedupedApproved.join('\n')}`);
 
     setConsolidated(merged);
     setSave('idle');
