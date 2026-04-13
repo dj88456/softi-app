@@ -187,12 +187,28 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
   const [draft, setDraft] = useState('');
   const addRef = useRef<HTMLTextAreaElement>(null);
 
+  // Successes always shows the input; other sections toggle it via "+ Add"
+  const alwaysOpen = section === 'successes';
+  const [inputOpen, setInputOpen] = useState(alwaysOpen);
+
+  function openInput() {
+    setInputOpen(true);
+    setTimeout(() => addRef.current?.focus(), 0);
+  }
+
   function add() {
     const trimmed = draft.trim();
-    if (!trimmed) return;
+    if (!trimmed) {
+      if (!alwaysOpen) setInputOpen(false); // hide if user blurred with nothing typed
+      return;
+    }
     onChange([...items, trimmed]);
     setDraft('');
-    setTimeout(() => addRef.current?.focus(), 0);
+    if (alwaysOpen) {
+      setTimeout(() => addRef.current?.focus(), 0);
+    } else {
+      setInputOpen(false); // hide after adding in collapsible sections
+    }
   }
 
   function remove(i: number) { onChange(items.filter((_, idx) => idx !== i)); }
@@ -249,7 +265,8 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
         ))}
       </ul>
 
-      {/* Add new item — dot aligns with items above */}
+      {/* Add new item */}
+      {inputOpen ? (
       <div className="flex gap-2 items-start">
         <span className={`mt-2.5 w-2 h-2 rounded-full flex-shrink-0 ${meta.badge} opacity-40`} />
         <RichTextInput
@@ -270,6 +287,14 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
           + Add
         </button>
       </div>
+      ) : (
+        <button
+          onClick={openInput}
+          className={`mt-1 px-3 py-1.5 rounded-lg text-sm font-semibold ${meta.badge} text-white hover:opacity-90 transition`}
+        >
+          + Add
+        </button>
+      )}
     </div>
   );
 }
