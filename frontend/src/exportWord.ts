@@ -179,9 +179,11 @@ export async function exportToWord(params: {
         );
       }
 
-      // Blank line between items (not after the last one)
+      // Blank line(s) between items (not after the last one)
+      // Opportunities, Failures, Threats, Issues get an extra blank line for readability
       if (idx < items.length - 1) {
         children.push(blank());
+        if (key !== 'successes') children.push(blank());
       }
     }
 
