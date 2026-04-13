@@ -168,13 +168,15 @@ export async function exportToWord(params: {
         }),
       );
 
-      // Remaining lines: Word native bullet, strip typed prefix if present
+      // Remaining lines: plain bullet char, no list indentation
       for (const line of lines.slice(1)) {
         children.push(
           new Paragraph({
-            bullet: { level: 0 },
             spacing: { before: 0, after: 0 },
-            children: parseInline(line.replace(BULLET_PREFIX_RE, ''), SIZE_BODY),
+            children: [
+              new TextRun({ text: '• ', size: SIZE_BODY, color: '111827' }),
+              ...parseInline(line.replace(BULLET_PREFIX_RE, ''), SIZE_BODY),
+            ],
           }),
         );
       }
