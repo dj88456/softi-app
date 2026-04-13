@@ -49,8 +49,13 @@ function RenderText({ text }: { text: string }) {
     <>
       {lines.map((line, i) => (
         <React.Fragment key={i}>
-          {i > 0 && <br />}
-          {renderInline(line)}
+          {i > 0 && (
+            <span className="flex items-start gap-1 mt-0.5">
+              <span className="text-gray-400 flex-shrink-0 leading-snug">○</span>
+              <span>{renderInline(line)}</span>
+            </span>
+          )}
+          {i === 0 && renderInline(line)}
         </React.Fragment>
       ))}
     </>
