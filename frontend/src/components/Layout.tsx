@@ -63,7 +63,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   onClick={handleLogout}
                   className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold transition"
                 >
-                  Change User
+                  Sign Out
                 </button>
               </>
             ) : (
