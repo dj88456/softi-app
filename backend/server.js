@@ -18,15 +18,19 @@ app.use(express.static(DIST));
 
 function parseReport(r) {
   const parse = s => { try { return JSON.parse(s ?? '[]'); } catch { return []; } };
+  const successes     = parse(r.successes);
+  const opportunities = parse(r.opportunities);
+  const failures      = parse(r.failures);
+  const threats       = parse(r.threats);
+  const issues        = parse(r.issues);
   return {
     ...r,
-    data: {
-      successes:     parse(r.successes),
-      opportunities: parse(r.opportunities),
-      failures:      parse(r.failures),
-      threats:       parse(r.threats),
-      issues:        parse(r.issues),
-    },
+    successes,
+    opportunities,
+    failures,
+    threats,
+    issues,
+    data: { successes, opportunities, failures, threats, issues },
   };
 }
 
