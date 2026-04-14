@@ -8,6 +8,7 @@ import TeamConsolidation from './pages/TeamConsolidation';
 import ConsolidationDrafts from './pages/ConsolidationDrafts';
 import SecretaryDashboard from './pages/SecretaryDashboard';
 import Admin from './pages/Admin';
+import PublicDashboard from './pages/PublicDashboard';
 
 // ─── User Context ──────────────────────────────────────────────────────────────
 
@@ -65,6 +66,7 @@ export default function App() {
                 : <Navigate to="/" replace />
             } />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/view" element={<PublicDashboard />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Layout>
