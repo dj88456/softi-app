@@ -161,10 +161,10 @@ export default function PublicDashboard() {
                 <span className="font-black text-2xl tracking-tight">BTS</span>
                 <span className="text-indigo-300 font-semibold text-lg">EA SOFTI Weekly Report</span>
               </div>
-              <div className="text-indigo-200 text-sm">{dateRange}</div>
+              <div className="text-white font-bold text-base mt-1">{dateRange}</div>
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-10">
               {/* Week navigation */}
               <div className="flex items-center gap-2">
                 <button
@@ -186,7 +186,7 @@ export default function PublicDashboard() {
               {/* Exit */}
               <button
                 onClick={() => navigate('/')}
-                className="px-4 py-1.5 rounded-lg bg-white text-indigo-700 text-sm font-bold hover:bg-indigo-50 transition shadow-sm"
+                className="px-5 py-2 rounded-lg bg-white text-indigo-700 text-sm font-bold hover:bg-indigo-50 transition shadow-sm"
               >
                 ← Exit
               </button>
