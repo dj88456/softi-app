@@ -1,5 +1,10 @@
 node_modules/
 dist/
 backend/db.json
+backend/bts.db
+backend/bts.db-shm
+backend/bts.db-wal
 *.log
 .DS_Store
+.vite/
+.claude/
