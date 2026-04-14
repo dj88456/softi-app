@@ -153,7 +153,7 @@ export default function PublicDashboard() {
 
       {/* ── Hero header ───────────────────────────────────────────────────────── */}
       <div className="bg-indigo-700 text-white">
-        <div className="max-w-5xl mx-auto px-6 py-8">
+        <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
             {/* Title */}
             <div>
@@ -203,7 +203,7 @@ export default function PublicDashboard() {
 
       {/* ── Section jump nav ──────────────────────────────────────────────────── */}
       <div className="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-5xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="flex gap-1 py-2 overflow-x-auto">
             {SECTIONS.map(s => (
               <button
@@ -221,7 +221,7 @@ export default function PublicDashboard() {
       </div>
 
       {/* ── Content ───────────────────────────────────────────────────────────── */}
-      <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
         {loading ? (
           <div className="text-center py-24 text-gray-400 text-lg">Loading…</div>
         ) : reports.length === 0 ? (
