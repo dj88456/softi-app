@@ -65,7 +65,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               location.pathname === '/view' && (
                 <button
                   onClick={() => navigate('/')}
-                  className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold transition"
+                  className="px-4 py-1.5 rounded-lg bg-white text-indigo-700 text-sm font-bold hover:bg-indigo-50 transition shadow-sm"
                 >
                   Exit
                 </button>

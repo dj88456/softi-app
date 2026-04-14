@@ -154,15 +154,15 @@ export default function PublicDashboard() {
       {/* ── Hero header ───────────────────────────────────────────────────────── */}
       <div className="bg-indigo-700 text-white">
         <div className="max-w-5xl mx-auto px-6 py-8">
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             {/* Title */}
             <div>
               <div className="font-black text-2xl tracking-tight">BTS EA SOFTI Weekly Report</div>
               <div className="text-white font-bold text-base mt-1">{dateRange}</div>
             </div>
 
-            {/* Week navigation — centered */}
-            <div className="flex items-center gap-2 mx-auto">
+            {/* Week navigation */}
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => setSearchParams({ week: prevWeek(week) })}
                 className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold transition"
