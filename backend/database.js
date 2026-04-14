@@ -1,55 +1,58 @@
-import Database from 'better-sqlite3';
+import { JSONFilePreset } from 'lowdb/node';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const db = new Database(join(__dirname, 'bts.db'));
+const dbPath = join(__dirname, 'db.json');
 
-// WAL mode: allows concurrent reads while writing (big win for multi-user)
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+const defaultData = {
+  teams: [],
+  members: [],
+  weekly_reports: [],
+  consolidated_reports: [],
+  _nextId: { teams: 1, members: 1, weekly_reports: 1, consolidated_reports: 1 },
+};
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS teams (
-    id   INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE
-  );
+const db = await JSONFilePreset(dbPath, defaultData);
 
-  CREATE TABLE IF NOT EXISTS members (
-    id      INTEGER PRIMARY KEY AUTOINCREMENT,
-    team_id INTEGER REFERENCES teams(id) ON DELETE SET NULL,
-    name    TEXT NOT NULL,
-    role    TEXT NOT NULL DEFAULT 'member'
-  );
+// ── Helper: auto-increment ID ────────────────────────────────────────────────
+function nextId(table) {
+  const id = db.data._nextId[table];
+  db.data._nextId[table] = id + 1;
+  return id;
+}
 
-  CREATE TABLE IF NOT EXISTS weekly_reports (
-    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    member_id     INTEGER NOT NULL REFERENCES members(id) ON DELETE CASCADE,
-    team_id       INTEGER REFERENCES teams(id) ON DELETE SET NULL,
-    week          TEXT NOT NULL,
-    successes     TEXT NOT NULL DEFAULT '[]',
-    opportunities TEXT NOT NULL DEFAULT '[]',
-    failures      TEXT NOT NULL DEFAULT '[]',
-    threats       TEXT NOT NULL DEFAULT '[]',
-    issues        TEXT NOT NULL DEFAULT '[]',
-    status        TEXT NOT NULL DEFAULT 'draft',
-    submitted_at  TEXT,
-    UNIQUE(member_id, week)
-  );
+// ── Seed sample data if empty ────────────────────────────────────────────────
+if (db.data.teams.length === 0) {
+  const addTeam = (name) => {
+    const id = nextId('teams');
+    db.data.teams.push({ id, name });
+    return id;
+  };
+  const addMember = (team_id, name, role) => {
+    const id = nextId('members');
+    db.data.members.push({ id, team_id: team_id ?? null, name, role });
+    return id;
+  };
 
-  CREATE TABLE IF NOT EXISTS consolidated_reports (
-    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    team_id       INTEGER NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
-    week          TEXT NOT NULL,
-    successes     TEXT NOT NULL DEFAULT '[]',
-    opportunities TEXT NOT NULL DEFAULT '[]',
-    failures      TEXT NOT NULL DEFAULT '[]',
-    threats       TEXT NOT NULL DEFAULT '[]',
-    issues        TEXT NOT NULL DEFAULT '[]',
-    status        TEXT NOT NULL DEFAULT 'draft',
-    submitted_at  TEXT,
-    UNIQUE(team_id, week)
-  );
-`);
+  const t1 = addTeam('Engineering');
+  const t2 = addTeam('Marketing');
+  const t3 = addTeam('Operations');
 
-export { db };
+  addMember(t1, 'Alice Chen',  'leader');
+  addMember(t1, 'Bob Wang',    'member');
+  addMember(t1, 'Carol Liu',   'member');
+
+  addMember(t2, 'David Zhang', 'leader');
+  addMember(t2, 'Emma Li',     'member');
+  addMember(t2, 'Frank Wu',    'member');
+
+  addMember(t3, 'Grace Zhao',  'leader');
+  addMember(t3, 'Henry Sun',   'member');
+
+  addMember(null, 'Sarah (Secretary)', 'secretary');
+
+  await db.write();
+}
+
+export { db, nextId };
