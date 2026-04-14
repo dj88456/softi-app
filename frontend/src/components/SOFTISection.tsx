@@ -185,7 +185,9 @@ export function SOFTISectionReadOnly({ section, items, onCopy, highlight }: Read
         <ul className="space-y-3">
           {items.map((item, i) => (
             <li key={i} className="flex items-start gap-2 text-base text-gray-700 group">
-              <span className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${meta.badge}`} />
+              <span className={`mt-0.5 w-5 h-5 rounded-full flex-shrink-0 ${meta.badge} text-white text-xs font-bold flex items-center justify-center`}>
+                {i + 1}
+              </span>
               <span className="flex-1 font-medium">
                 <RenderText text={item} highlight={highlight} />
               </span>
@@ -299,7 +301,9 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
                 ⠿
               </div>
             )}
-            <span className={`mt-2.5 w-2 h-2 rounded-full flex-shrink-0 ${meta.badge}`} />
+            <span className={`mt-1.5 w-5 h-5 rounded-full flex-shrink-0 ${meta.badge} text-white text-xs font-bold flex items-center justify-center`}>
+              {i + 1}
+            </span>
             {editingIdx === i ? (
               <RichTextInput
                 value={item}
@@ -330,7 +334,9 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
       {/* Add new item */}
       {inputOpen ? (
       <div className="flex gap-2 items-start">
-        <span className={`mt-2.5 w-2 h-2 rounded-full flex-shrink-0 ${meta.badge} opacity-40`} />
+        <span className={`mt-1.5 w-5 h-5 rounded-full flex-shrink-0 ${meta.badge} text-white text-xs font-bold flex items-center justify-center opacity-40`}>
+          {items.length + 1}
+        </span>
         <RichTextInput
           value={draft}
           onChange={setDraft}
