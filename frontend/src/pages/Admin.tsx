@@ -2,12 +2,51 @@ import React, { useState, useEffect } from 'react';
 import { getTeams, getMembers, createTeam, createMember, deleteMember, deleteTeam } from '../api';
 import type { Team, Member } from '../types';
 
+type ConfirmState =
+  | { type: 'team';   id: number; name: string }
+  | { type: 'member'; id: number; name: string }
+  | null;
+
+function ConfirmDialog({ confirm, onConfirm, onCancel }: {
+  confirm: NonNullable<ConfirmState>;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm mx-4">
+        <h3 className="text-base font-semibold text-gray-800 mb-2">
+          Delete {confirm.type === 'team' ? 'Team' : 'Member'}
+        </h3>
+        <p className="text-sm text-gray-500 mb-6">
+          Are you sure you want to delete <span className="font-medium text-gray-700">"{confirm.name}"</span>? This cannot be undone.
+        </p>
+        <div className="flex gap-3 justify-end">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 rounded-lg transition"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Admin() {
   const [teams, setTeams]     = useState<Team[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [newTeam, setNewTeam] = useState('');
   const [newMember, setNewMember] = useState({ name: '', team_id: '', role: 'member' as string });
   const [loading, setLoading] = useState(true);
+  const [confirm, setConfirm] = useState<ConfirmState>(null);
 
   async function load() {
     const [t, m] = await Promise.all([getTeams(), getMembers()]);
@@ -36,15 +75,11 @@ export default function Admin() {
     load();
   }
 
-  async function handleDeleteTeam(id: number) {
-    if (!confirm('Delete this team?')) return;
-    await deleteTeam(id);
-    load();
-  }
-
-  async function handleDeleteMember(id: number) {
-    if (!confirm('Delete this member?')) return;
-    await deleteMember(id);
+  async function handleConfirmed() {
+    if (!confirm) return;
+    if (confirm.type === 'team')   await deleteTeam(confirm.id);
+    if (confirm.type === 'member') await deleteMember(confirm.id);
+    setConfirm(null);
     load();
   }
 
@@ -52,6 +87,14 @@ export default function Admin() {
 
   return (
     <div className="max-w-7xl mx-auto">
+      {confirm && (
+        <ConfirmDialog
+          confirm={confirm}
+          onConfirm={handleConfirmed}
+          onCancel={() => setConfirm(null)}
+        />
+      )}
+
       <div className="flex items-center gap-3 mb-6 pt-4">
         <h1 className="text-2xl font-bold text-gray-800">Admin</h1>
         <span className="text-xs px-2 py-1 bg-gray-100 text-gray-500 rounded">Manage Teams & Members</span>
@@ -88,7 +131,10 @@ export default function Admin() {
               {teams.map(t => (
                 <li key={t.id} className="flex items-center justify-between px-4 py-2.5 bg-gray-50 rounded-xl text-sm">
                   <span className="font-medium text-gray-700">{t.name}</span>
-                  <button onClick={() => handleDeleteTeam(t.id)} className="text-red-400 hover:text-red-600 text-xs">
+                  <button
+                    onClick={() => setConfirm({ type: 'team', id: t.id, name: t.name })}
+                    className="text-red-400 hover:text-red-600 text-xs"
+                  >
                     Delete
                   </button>
                 </li>
@@ -153,7 +199,10 @@ export default function Admin() {
                     }`}>{m.role}</span>
                     {m.team_name && <span className="ml-1 text-xs text-gray-400">{m.team_name}</span>}
                   </div>
-                  <button onClick={() => handleDeleteMember(m.id)} className="text-red-400 hover:text-red-600 text-xs">
+                  <button
+                    onClick={() => setConfirm({ type: 'member', id: m.id, name: m.name })}
+                    className="text-red-400 hover:text-red-600 text-xs"
+                  >
                     Delete
                   </button>
                 </li>
