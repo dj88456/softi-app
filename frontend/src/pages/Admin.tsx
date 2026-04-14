@@ -58,14 +58,14 @@ export default function Admin() {
       </div>
 
       {loading ? <div className="text-gray-400">Loading…</div> : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
           {/* Teams */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-            <h2 className="font-semibold text-gray-700 mb-4">Teams</h2>
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
+            <h2 className="font-semibold text-gray-700 mb-5 text-lg">Teams</h2>
 
             {/* Add team */}
-            <div className="flex gap-2 mb-4">
+            <div className="flex gap-3 mb-5">
               <input
                 type="text"
                 value={newTeam}
@@ -84,9 +84,9 @@ export default function Admin() {
             </div>
 
             {/* Team list */}
-            <ul className="space-y-1.5">
+            <ul className="space-y-2">
               {teams.map(t => (
-                <li key={t.id} className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg text-sm">
+                <li key={t.id} className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-xl text-base">
                   <span className="font-medium text-gray-700">{t.name}</span>
                   <button onClick={() => handleDeleteTeam(t.id)} className="text-red-400 hover:text-red-600 text-xs">
                     Delete
@@ -97,11 +97,11 @@ export default function Admin() {
           </div>
 
           {/* Members */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-            <h2 className="font-semibold text-gray-700 mb-4">Members</h2>
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
+            <h2 className="font-semibold text-gray-700 mb-5 text-lg">Members</h2>
 
             {/* Add member */}
-            <div className="space-y-2 mb-4">
+            <div className="space-y-3 mb-5">
               <input
                 type="text"
                 value={newMember.name}
@@ -109,7 +109,7 @@ export default function Admin() {
                 placeholder="Full name…"
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <select
                   value={newMember.role}
                   onChange={e => setNewMember(p => ({ ...p, role: e.target.value }))}
@@ -140,9 +140,9 @@ export default function Admin() {
             </div>
 
             {/* Member list */}
-            <ul className="space-y-1.5 max-h-72 overflow-y-auto">
+            <ul className="space-y-2 max-h-80 overflow-y-auto">
               {members.map(m => (
-                <li key={m.id} className="flex items-center justify-between px-3 py-1.5 bg-gray-50 rounded-lg text-sm">
+                <li key={m.id} className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-xl text-base">
                   <div>
                     <span className="font-medium text-gray-700">{m.name}</span>
                     <span className={`ml-2 text-xs px-1.5 py-0.5 rounded ${
