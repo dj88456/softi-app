@@ -118,8 +118,9 @@ export default function Admin() {
                   <option value="member">Member</option>
                   <option value="leader">Leader</option>
                   <option value="secretary">Secretary</option>
+                  <option value="admin">Admin</option>
                 </select>
-                {newMember.role !== 'secretary' && (
+                {newMember.role !== 'secretary' && newMember.role !== 'admin' && (
                   <select
                     value={newMember.team_id}
                     onChange={e => setNewMember(p => ({ ...p, team_id: e.target.value }))}
