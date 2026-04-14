@@ -88,10 +88,10 @@ export default function Home() {
       {/* ── Hero: public dashboard entry point ─────────────────────────────── */}
       <Link
         to="/view"
-        className="block w-full mb-8 rounded-2xl bg-indigo-700 hover:bg-indigo-600 text-white text-center py-8 px-6 shadow-xl transition group"
+        className="block w-full mb-8 rounded-xl bg-indigo-700 hover:bg-indigo-600 text-white text-center py-5 px-6 shadow-lg transition"
       >
-        <div className="text-xs font-semibold tracking-widest text-indigo-300 uppercase mb-2">BTS Department</div>
-        <div className="text-3xl font-black tracking-tight mb-1">BTS SOFTI REPORT</div>
+        <div className="text-xs font-semibold tracking-widest text-indigo-300 uppercase mb-1">BTS Department</div>
+        <div className="text-2xl font-black tracking-tight mb-0.5">BTS SOFTI REPORT</div>
         <div className="text-indigo-200 text-sm">View this week's published team reports →</div>
       </Link>
 

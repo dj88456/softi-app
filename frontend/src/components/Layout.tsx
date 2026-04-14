@@ -44,10 +44,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 Department Summary
               </NavLink>
             )}
-            {!user && (
-              <NavLink to="/view" active={location.pathname === '/view'}>BTS SOFTI Report</NavLink>
-            )}
-            {user?.role === 'admin' && (
+{user?.role === 'admin' && (
               <NavLink to="/admin" active={location.pathname === '/admin'}>Admin</NavLink>
             )}
           </nav>
