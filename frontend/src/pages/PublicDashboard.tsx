@@ -155,42 +155,39 @@ export default function PublicDashboard() {
       {/* ── Hero header ───────────────────────────────────────────────────────── */}
       <div className="bg-indigo-700 text-white">
         <div className="max-w-5xl mx-auto px-6 py-8">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-4">
+            {/* Title */}
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-black text-2xl tracking-tight">BTS</span>
-                <span className="text-indigo-300 font-semibold text-lg">EA SOFTI Weekly Report</span>
-              </div>
+              <div className="font-black text-2xl tracking-tight">BTS EA SOFTI Weekly Report</div>
               <div className="text-white font-bold text-base mt-1">{dateRange}</div>
             </div>
 
-            <div className="flex items-center gap-10">
-              {/* Week navigation */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setSearchParams({ week: prevWeek(week) })}
-                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold transition"
-                >
-                  ◄ Prev
-                </button>
-                <span className="px-3 py-1.5 rounded-lg bg-indigo-800 text-sm font-bold tabular-nums min-w-[90px] text-center">
-                  {formatWeek(week)}
-                </span>
-                <button
-                  onClick={() => setSearchParams({ week: nextWeek(week) })}
-                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold transition"
-                >
-                  Next ►
-                </button>
-              </div>
-              {/* Exit */}
+            {/* Week navigation — centered */}
+            <div className="flex items-center gap-2 mx-auto">
               <button
-                onClick={() => navigate('/')}
-                className="px-5 py-2 rounded-lg bg-white text-indigo-700 text-sm font-bold hover:bg-indigo-50 transition shadow-sm"
+                onClick={() => setSearchParams({ week: prevWeek(week) })}
+                className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold transition"
               >
-                ← Exit
+                ◄ Prev
+              </button>
+              <span className="px-3 py-1.5 rounded-lg bg-indigo-800 text-sm font-bold tabular-nums min-w-[90px] text-center">
+                {formatWeek(week)}
+              </span>
+              <button
+                onClick={() => setSearchParams({ week: nextWeek(week) })}
+                className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold transition"
+              >
+                Next ►
               </button>
             </div>
+
+            {/* Exit — far right */}
+            <button
+              onClick={() => navigate('/')}
+              className="px-5 py-2 rounded-lg bg-white text-indigo-700 text-sm font-bold hover:bg-indigo-50 transition shadow-sm ml-auto"
+            >
+              ← Exit
+            </button>
           </div>
 
           {/* Stats row */}
