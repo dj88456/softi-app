@@ -14,8 +14,8 @@ Start-Process -WindowStyle Hidden -FilePath "node" `
 Start-Sleep -Milliseconds 1500
 
 # Start frontend
-Start-Process -WindowStyle Hidden -FilePath "npm" `
-    -ArgumentList "run", "dev" `
+Start-Process -WindowStyle Hidden -FilePath "cmd" `
+    -ArgumentList "/c", "npm run dev" `
     -WorkingDirectory "$root\frontend"
 
 Write-Host "BTS SOFTI servers started in background."
