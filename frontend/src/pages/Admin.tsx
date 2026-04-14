@@ -62,7 +62,7 @@ export default function Admin() {
 
           {/* Teams */}
           <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
-            <h2 className="font-semibold text-gray-700 mb-5 text-lg">Teams</h2>
+            <h2 className="font-semibold text-gray-700 mb-5 text-base">Teams</h2>
 
             {/* Add team */}
             <div className="flex gap-3 mb-5">
@@ -72,12 +72,12 @@ export default function Admin() {
                 onChange={e => setNewTeam(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleAddTeam()}
                 placeholder="New team name…"
-                className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
               <button
                 onClick={handleAddTeam}
                 disabled={!newTeam.trim()}
-                className="px-5 py-2.5 bg-indigo-700 hover:bg-indigo-600 text-white text-base font-semibold rounded-lg disabled:opacity-40 transition"
+                className="px-4 py-2 bg-indigo-700 hover:bg-indigo-600 text-white text-sm font-semibold rounded-lg disabled:opacity-40 transition"
               >
                 Add
               </button>
@@ -86,7 +86,7 @@ export default function Admin() {
             {/* Team list */}
             <ul className="space-y-2">
               {teams.map(t => (
-                <li key={t.id} className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-xl text-base">
+                <li key={t.id} className="flex items-center justify-between px-4 py-2.5 bg-gray-50 rounded-xl text-sm">
                   <span className="font-medium text-gray-700">{t.name}</span>
                   <button onClick={() => handleDeleteTeam(t.id)} className="text-red-400 hover:text-red-600 text-xs">
                     Delete
@@ -98,7 +98,7 @@ export default function Admin() {
 
           {/* Members */}
           <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
-            <h2 className="font-semibold text-gray-700 mb-5 text-lg">Members</h2>
+            <h2 className="font-semibold text-gray-700 mb-5 text-base">Members</h2>
 
             {/* Add member */}
             <div className="space-y-3 mb-5">
@@ -107,13 +107,13 @@ export default function Admin() {
                 value={newMember.name}
                 onChange={e => setNewMember(p => ({ ...p, name: e.target.value }))}
                 placeholder="Full name…"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
               <div className="flex gap-3">
                 <select
                   value={newMember.role}
                   onChange={e => setNewMember(p => ({ ...p, role: e.target.value }))}
-                  className="border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 >
                   <option value="member">Member</option>
                   <option value="leader">Leader</option>
@@ -123,7 +123,7 @@ export default function Admin() {
                   <select
                     value={newMember.team_id}
                     onChange={e => setNewMember(p => ({ ...p, team_id: e.target.value }))}
-                    className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                   >
                     <option value="">-- Team --</option>
                     {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
@@ -132,7 +132,7 @@ export default function Admin() {
                 <button
                   onClick={handleAddMember}
                   disabled={!newMember.name.trim()}
-                  className="px-5 py-2.5 bg-indigo-700 hover:bg-indigo-600 text-white text-base font-semibold rounded-lg disabled:opacity-40 transition"
+                  className="px-4 py-2 bg-indigo-700 hover:bg-indigo-600 text-white text-sm font-semibold rounded-lg disabled:opacity-40 transition"
                 >
                   Add
                 </button>
@@ -142,7 +142,7 @@ export default function Admin() {
             {/* Member list */}
             <ul className="space-y-2 max-h-80 overflow-y-auto">
               {members.map(m => (
-                <li key={m.id} className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-xl text-base">
+                <li key={m.id} className="flex items-center justify-between px-4 py-2.5 bg-gray-50 rounded-xl text-sm">
                   <div>
                     <span className="font-medium text-gray-700">{m.name}</span>
                     <span className={`ml-2 text-xs px-1.5 py-0.5 rounded ${
