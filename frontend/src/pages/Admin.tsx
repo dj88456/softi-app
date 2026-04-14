@@ -1,44 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { getTeams, getMembers, createTeam, createMember, deleteMember, deleteTeam } from '../api';
 import type { Team, Member } from '../types';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 type ConfirmState =
   | { type: 'team';   id: number; name: string }
   | { type: 'member'; id: number; name: string }
   | null;
-
-function ConfirmDialog({ confirm, onConfirm, onCancel }: {
-  confirm: NonNullable<ConfirmState>;
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm mx-4">
-        <h3 className="text-base font-semibold text-gray-800 mb-2">
-          Delete {confirm.type === 'team' ? 'Team' : 'Member'}
-        </h3>
-        <p className="text-sm text-gray-500 mb-6">
-          Are you sure you want to delete <span className="font-medium text-gray-700">"{confirm.name}"</span>? This cannot be undone.
-        </p>
-        <div className="flex gap-3 justify-end">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="px-4 py-2 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 rounded-lg transition"
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function Admin() {
   const [teams, setTeams]     = useState<Team[]>([]);
@@ -89,7 +57,8 @@ export default function Admin() {
     <div className="max-w-7xl mx-auto">
       {confirm && (
         <ConfirmDialog
-          confirm={confirm}
+          title={`Delete ${confirm.type === 'team' ? 'Team' : 'Member'}`}
+          message={<>Are you sure you want to delete <span className="font-medium text-gray-700">"{confirm.name}"</span>? This cannot be undone.</>}
           onConfirm={handleConfirmed}
           onCancel={() => setConfirm(null)}
         />

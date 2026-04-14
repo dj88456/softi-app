@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { useUser } from '../App';
 import { getReports, getConsolidated, saveConsolidated, saveReport, deleteReport, getMembers } from '../api';
 import { getCurrentWeek, prevWeek, formatWeek, getWeekDateRange } from '../utils';
@@ -187,6 +188,7 @@ export default function TeamConsolidation() {
   const [saveState, setSave]              = useState<SaveState>('idle');
   const [loading, setLoading]             = useState(true);
   const [showMemberPicker, setShowMemberPicker] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   // ── History tab state ──────────────────────────────────────────────────────
   const [historyReports, setHistoryReports]   = useState<ConsolidatedReport[]>([]);
@@ -445,6 +447,15 @@ export default function TeamConsolidation() {
 
   return (
     <div>
+      {showClearConfirm && (
+        <ConfirmDialog
+          title="Clear Report"
+          message="Are you sure you want to clear all consolidated content? This cannot be undone."
+          confirmLabel="Clear"
+          onConfirm={() => { setConsolidated({ successes: [], opportunities: [], failures: [], threats: [], issues: [] }); setSave('idle'); setShowClearConfirm(false); }}
+          onCancel={() => setShowClearConfirm(false)}
+        />
+      )}
       {/* Header */}
       <div className="flex gap-6 border-b border-gray-200 mb-5">
         <div className="flex-1 flex flex-col">
@@ -685,7 +696,7 @@ export default function TeamConsolidation() {
                 <h2 className="font-semibold text-gray-700">Consolidated Report</h2>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => { if (confirm('Clear all consolidated content?')) { setConsolidated({ successes: [], opportunities: [], failures: [], threats: [], issues: [] }); setSave('idle'); } }}
+                    onClick={() => setShowClearConfirm(true)}
                     className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 text-xs font-semibold transition"
                     title="Clear all consolidated content"
                   >
