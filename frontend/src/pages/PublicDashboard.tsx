@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { getConsolidated } from '../api';
 import { prevWeek, nextWeek, getCurrentWeek, getWeekDateRange, formatWeek } from '../utils';
 import type { ConsolidatedReport } from '../types';
@@ -107,7 +107,6 @@ function ItemBlock({ text, index, badgeClass }: { text: string; index: number; b
 // ─── Main component ────────────────────────────────────────────────────────────
 
 export default function PublicDashboard() {
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const week = searchParams.get('week') || prevWeek(getCurrentWeek());
   const dateRange = getWeekDateRange(week);
@@ -181,13 +180,6 @@ export default function PublicDashboard() {
               </button>
             </div>
 
-            {/* Exit — far right */}
-            <button
-              onClick={() => navigate('/')}
-              className="px-5 py-2 rounded-lg bg-white text-indigo-700 text-sm font-bold hover:bg-indigo-50 transition shadow-sm ml-auto"
-            >
-              ← Exit
-            </button>
           </div>
 
           {/* Stats row */}

@@ -62,7 +62,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </button>
               </>
             ) : (
-              <span className="text-indigo-300 text-sm font-medium">Not signed in</span>
+              <div className="flex items-center gap-3">
+                <span className="text-indigo-300 text-sm font-medium">Not signed in</span>
+                {location.pathname === '/view' && (
+                  <button
+                    onClick={() => navigate('/')}
+                    className="px-3.5 py-1.5 rounded-lg bg-white text-indigo-700 text-sm font-bold hover:bg-indigo-50 transition shadow-sm"
+                  >
+                    ← Exit
+                  </button>
+                )}
+              </div>
             )}
           </div>
 
