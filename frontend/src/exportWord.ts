@@ -132,10 +132,11 @@ export async function exportToWord(params: {
     if (items.length === 0 || allNA) {
       children.push(
         new Paragraph({
-          spacing: { after: 4 * PT },
+          spacing: { before: 0, after: 0 },
           children: [new TextRun({ text: 'n/a', font: 'Arial', size: SIZE_NA, color: '111827' })],
         }),
       );
+      children.push(blank());
       continue;
     }
 
