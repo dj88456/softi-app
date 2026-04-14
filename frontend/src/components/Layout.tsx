@@ -34,12 +34,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 Team Consolidation
               </NavLink>
             )}
-            {user?.role === 'leader' && (
-              <NavLink to="/drafts" active={location.pathname === '/drafts'}>
-                Drafts
-              </NavLink>
-            )}
-            {user?.role === 'secretary' && (
+{user?.role === 'secretary' && (
               <NavLink to="/dashboard" active={location.pathname === '/dashboard'}>
                 Department Summary
               </NavLink>

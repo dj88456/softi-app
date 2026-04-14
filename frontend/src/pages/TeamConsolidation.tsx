@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useUser } from '../App';
 import { getReports, getConsolidated, saveConsolidated, saveReport, deleteReport, getMembers } from '../api';
-import { getCurrentWeek, prevWeek } from '../utils';
-import type { WeeklyReport, SOFTIData, Member } from '../types';
+import { getCurrentWeek, prevWeek, formatWeek, getWeekDateRange } from '../utils';
+import type { WeeklyReport, SOFTIData, Member, ConsolidatedReport } from '../types';
 import WeekSelector from '../components/WeekSelector';
 import { SOFTISectionEditable, SOFTISectionReadOnly } from '../components/SOFTISection';
 import type { SectionKey } from '../components/SOFTISection';
 import { exportToWord } from '../exportWord';
+
+type Tab = 'consolidate' | 'history';
 
 const SECTIONS: SectionKey[] = ['successes', 'opportunities', 'failures', 'threats', 'issues'];
 
@@ -171,6 +173,9 @@ export default function TeamConsolidation() {
   const [searchParams, setSearchParams] = useSearchParams();
   const week = searchParams.get('week') || prevWeek(getCurrentWeek());
 
+  const navigate = useNavigate();
+  const [tab, setTab] = useState<Tab>('consolidate');
+
   const [search, setSearch] = useState('');
   const [droppedItems, setDroppedItems] = useState<DroppedItem[]>([]);
   const [showDropped, setShowDropped] = useState(false);
@@ -182,6 +187,29 @@ export default function TeamConsolidation() {
   const [saveState, setSave]              = useState<SaveState>('idle');
   const [loading, setLoading]             = useState(true);
   const [showMemberPicker, setShowMemberPicker] = useState(false);
+
+  // ── History tab state ──────────────────────────────────────────────────────
+  const [historyReports, setHistoryReports]   = useState<ConsolidatedReport[]>([]);
+  const [historyLoading, setHistoryLoading]   = useState(false);
+  const [historySearch, setHistorySearch]     = useState('');
+  const [historyExpanded, setHistoryExpanded] = useState<Set<string>>(new Set());
+  const [historyFilter, setHistoryFilter]     = useState<'all' | 'draft'>('all');
+
+  const loadHistory = useCallback(async () => {
+    if (!user?.team_id) return;
+    setHistoryLoading(true);
+    try {
+      const data = await getConsolidated({ team_id: user.team_id });
+      data.sort((a, b) => (b.week > a.week ? 1 : -1));
+      setHistoryReports(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, [user?.team_id]);
+
+  useEffect(() => { if (tab === 'history') loadHistory(); }, [tab, loadHistory]);
 
   const load = useCallback(async () => {
     if (!user?.team_id) return;
@@ -404,31 +432,143 @@ export default function TeamConsolidation() {
   const totalCount = memberReports.length;
   const isSubmitted = conStatus === 'submitted';
 
+  const historyVisible = historyReports.filter(r => {
+    if (historyFilter === 'draft' && r.status !== 'draft') return false;
+    if (historySearch.trim()) {
+      const q = historySearch.toLowerCase();
+      const inWeek = r.week.toLowerCase().includes(q);
+      const inContent = SECTIONS.some(s => r.data[s].some(item => item.toLowerCase().includes(q)));
+      if (!inWeek && !inContent) return false;
+    }
+    return true;
+  });
+
   return (
     <div>
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Team Consolidation</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
-            {user?.team_name} · {user?.member_name}
-          </p>
+      <div className="flex gap-6 border-b border-gray-200 mb-5">
+        <div className="flex-1 flex flex-col">
+          <div className="mt-6 mb-4">
+            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight leading-tight">Team Consolidation</h1>
+            <p className="text-sm text-gray-500 font-semibold mt-0.5">{user?.team_name} · {user?.member_name}</p>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setTab('consolidate')}
+              className={`px-4 py-2 text-base font-semibold rounded-t-lg border-b-2 transition ${
+                tab === 'consolidate'
+                  ? 'border-indigo-600 text-indigo-700 bg-indigo-50'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Consolidate
+            </button>
+            <button
+              onClick={() => setTab('history')}
+              className={`px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 transition ${
+                tab === 'history'
+                  ? 'border-indigo-600 text-indigo-700 bg-indigo-50'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              History
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search…"
-            className="h-9 px-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-40 transition"
-          />
-          <WeekSelector week={week} onChange={w => setSearchParams({ week: w })} />
+        <div className="pb-px self-end flex items-center gap-2">
+          {tab === 'consolidate' && (
+            <>
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search…"
+                className="h-9 px-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-40 transition"
+              />
+              <WeekSelector week={week} onChange={w => setSearchParams({ week: w })} />
+            </>
+          )}
+          {tab === 'history' && (
+            <input
+              type="text"
+              value={historySearch}
+              onChange={e => setHistorySearch(e.target.value)}
+              placeholder="Search…"
+              className="h-9 px-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-40 transition"
+            />
+          )}
         </div>
       </div>
 
-      {loading ? (
-        <div className="text-center py-12 text-gray-400">Loading…</div>
-      ) : (
+      {/* ── HISTORY TAB ─────────────────────────────────────────────────────── */}
+      {tab === 'history' && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex bg-gray-100 rounded-lg p-1 gap-1">
+              <button onClick={() => setHistoryFilter('all')} className={`px-3 py-1 rounded-md text-xs font-semibold transition ${historyFilter === 'all' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>All</button>
+              <button onClick={() => setHistoryFilter('draft')} className={`px-3 py-1 rounded-md text-xs font-semibold transition ${historyFilter === 'draft' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>Drafts only</button>
+            </div>
+          </div>
+          {historyLoading ? (
+            <div className="text-center py-12 text-gray-400">Loading…</div>
+          ) : historyVisible.length === 0 ? (
+            <div className="text-center py-16 text-gray-400 bg-white border border-gray-200 rounded-xl">
+              <p className="text-lg font-medium mb-1">No reports found</p>
+              <p className="text-sm">{historySearch ? 'Try a different search term.' : 'No consolidated reports yet.'}</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {historyVisible.map(r => {
+                const isExpanded = historyExpanded.has(r.week);
+                const totalItems = SECTIONS.reduce((n, s) => n + (r.data[s]?.length ?? 0), 0);
+                return (
+                  <div key={r.week} className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                    <div
+                      className="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-gray-50 transition"
+                      onClick={() => setHistoryExpanded(prev => { const next = new Set(prev); next.has(r.week) ? next.delete(r.week) : next.add(r.week); return next; })}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-gray-800 text-base">{formatWeek(r.week)}</span>
+                          <span className="text-xs text-gray-400">{getWeekDateRange(r.week)}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${r.status === 'draft' ? 'bg-amber-100 text-amber-700' : r.status === 'submitted' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                            {r.status === 'draft' ? '◌ Draft' : r.status === 'submitted' ? '→ Submitted' : '✓ Published'}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-400 mt-0.5">{totalItems} item{totalItems !== 1 ? 's' : ''}</p>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <button
+                          onClick={e => { e.stopPropagation(); navigate(`/consolidation?week=${encodeURIComponent(r.week)}`); setTab('consolidate'); }}
+                          className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition"
+                        >
+                          ✎ Open in Editor
+                        </button>
+                        <span className="text-gray-400 text-sm">{isExpanded ? '▲' : '▼'}</span>
+                      </div>
+                    </div>
+                    {isExpanded && (
+                      <div className="border-t border-gray-100 px-5 py-4 bg-gray-50">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {SECTIONS.map(s => (
+                            <SOFTISectionReadOnly key={s} section={s} items={r.data[s] ?? []} highlight={historySearch} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── CONSOLIDATE TAB ──────────────────────────────────────────────────── */}
+      {tab === 'consolidate' && (
+        loading ? (
+          <div className="text-center py-12 text-gray-400">Loading…</div>
+        ) : (
         <div className="flex gap-5 flex-col lg:flex-row">
 
           {/* Left: Member Reports */}
@@ -625,6 +765,7 @@ export default function TeamConsolidation() {
           </div>
 
         </div>
+        )
       )}
 
       {/* ── Paste-import modal ── */}
