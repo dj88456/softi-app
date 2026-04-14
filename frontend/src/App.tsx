@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import type { CurrentUser } from './types';
 import Layout from './components/Layout';
@@ -65,7 +65,11 @@ export default function App() {
                 ? <SecretaryDashboard />
                 : <Navigate to="/" replace />
             } />
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin" element={
+              user?.role === 'admin'
+                ? <Admin />
+                : <Navigate to="/" replace />
+            } />
             <Route path="/view" element={<PublicDashboard />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

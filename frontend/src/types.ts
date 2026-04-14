@@ -48,7 +48,7 @@ export interface ConsolidatedReport {
   submitted_at?: string;
 }
 
-export type UserRole = 'member' | 'leader' | 'secretary';
+export type UserRole = 'member' | 'leader' | 'secretary' | 'admin';
 
 export interface CurrentUser {
   role: UserRole;

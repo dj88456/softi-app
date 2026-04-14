@@ -10,6 +10,7 @@ const ROLE_CARDS: { role: UserRole; label: string; desc: string; icon: string; c
   { role: 'member',    label: 'Team Member',   desc: 'Submit your individual weekly SOFTI report', icon: '📝', color: 'border-blue-400 hover:bg-blue-50' },
   { role: 'leader',    label: 'Team Leader',   desc: 'Submit your report & consolidate team reports', icon: '👥', color: 'border-indigo-400 hover:bg-indigo-50' },
   { role: 'secretary', label: 'Secretary',     desc: 'View all team reports & publish department summary', icon: '📋', color: 'border-purple-400 hover:bg-purple-50' },
+  { role: 'admin',     label: 'Admin',         desc: 'Manage teams and members', icon: '⚙️', color: 'border-gray-400 hover:bg-gray-50' },
 ];
 
 export default function Home() {
@@ -29,16 +30,18 @@ export default function Home() {
     if (user) {
       if (user.role === 'secretary') navigate('/dashboard');
       else if (user.role === 'leader') navigate('/consolidation');
+      else if (user.role === 'admin') navigate('/admin');
       else navigate('/report');
     }
   }, [user, navigate]);
 
   // Load teams when role is selected
   useEffect(() => {
-    if (step === 'identity' && selectedRole !== 'secretary') {
+    if (step !== 'identity') return;
+    if (selectedRole === 'secretary' || selectedRole === 'admin') {
+      getMembers().then(all => setMembers(all.filter(m => m.role === selectedRole))).catch(console.error);
+    } else {
       getTeams().then(setTeams).catch(console.error);
-    } else if (step === 'identity' && selectedRole === 'secretary') {
-      getMembers().then(all => setMembers(all.filter(m => m.role === 'secretary'))).catch(console.error);
     }
   }, [step, selectedRole]);
 
@@ -121,11 +124,11 @@ export default function Home() {
             ← Back
           </button>
           <h2 className="text-lg font-semibold mb-4 text-gray-800">
-            {selectedRole === 'secretary' ? 'Select your name' : 'Select your team & name'}
+            {selectedRole === 'secretary' || selectedRole === 'admin' ? 'Select your name' : 'Select your team & name'}
           </h2>
 
-          {/* Team selector (not for secretary) */}
-          {selectedRole !== 'secretary' && (
+          {/* Team selector (not for secretary or admin) */}
+          {selectedRole !== 'secretary' && selectedRole !== 'admin' && (
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">Team</label>
               <select
@@ -140,7 +143,7 @@ export default function Home() {
           )}
 
           {/* Member selector */}
-          {(selectedTeam || selectedRole === 'secretary') && (
+          {(selectedTeam || selectedRole === 'secretary' || selectedRole === 'admin') && (
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
               <select
