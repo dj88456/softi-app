@@ -301,7 +301,7 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
                 ⠿
               </div>
             )}
-            <span className={`mt-2 w-5 h-5 rounded-full flex-shrink-0 ${meta.badge} text-white text-xs font-bold flex items-center justify-center`}>
+            <span className={`mt-2.5 w-5 h-5 rounded-full flex-shrink-0 ${meta.badge} text-white text-xs font-bold flex items-center justify-center`}>
               {i + 1}
             </span>
             {editingIdx === i ? (
