@@ -51,8 +51,8 @@ export default function Admin() {
   const secretaries = members.filter(m => m.role === 'secretary');
 
   return (
-    <div className="max-w-4xl">
-      <div className="flex items-center gap-3 mb-6">
+    <div className="max-w-3xl mx-auto">
+      <div className="flex items-center gap-3 mb-6 pt-4">
         <h1 className="text-2xl font-bold text-gray-800">Admin</h1>
         <span className="text-xs px-2 py-1 bg-gray-100 text-gray-500 rounded">Manage Teams & Members</span>
       </div>
@@ -72,12 +72,12 @@ export default function Admin() {
                 onChange={e => setNewTeam(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleAddTeam()}
                 placeholder="New team name…"
-                className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
               <button
                 onClick={handleAddTeam}
                 disabled={!newTeam.trim()}
-                className="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-white text-sm rounded-lg disabled:opacity-40 transition"
+                className="px-5 py-2.5 bg-indigo-700 hover:bg-indigo-600 text-white text-base font-semibold rounded-lg disabled:opacity-40 transition"
               >
                 Add
               </button>
@@ -107,13 +107,13 @@ export default function Admin() {
                 value={newMember.name}
                 onChange={e => setNewMember(p => ({ ...p, name: e.target.value }))}
                 placeholder="Full name…"
-                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
               <div className="flex gap-2">
                 <select
                   value={newMember.role}
                   onChange={e => setNewMember(p => ({ ...p, role: e.target.value }))}
-                  className="border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                  className="border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 >
                   <option value="member">Member</option>
                   <option value="leader">Leader</option>
@@ -123,7 +123,7 @@ export default function Admin() {
                   <select
                     value={newMember.team_id}
                     onChange={e => setNewMember(p => ({ ...p, team_id: e.target.value }))}
-                    className="flex-1 border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                    className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400"
                   >
                     <option value="">-- Team --</option>
                     {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
@@ -132,7 +132,7 @@ export default function Admin() {
                 <button
                   onClick={handleAddMember}
                   disabled={!newMember.name.trim()}
-                  className="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-white text-sm rounded-lg disabled:opacity-40 transition"
+                  className="px-5 py-2.5 bg-indigo-700 hover:bg-indigo-600 text-white text-base font-semibold rounded-lg disabled:opacity-40 transition"
                 >
                   Add
                 </button>
