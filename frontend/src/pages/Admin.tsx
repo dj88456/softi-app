@@ -51,7 +51,7 @@ export default function Admin() {
   const secretaries = members.filter(m => m.role === 'secretary');
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-5xl mx-auto">
       <div className="flex items-center gap-3 mb-6 pt-4">
         <h1 className="text-2xl font-bold text-gray-800">Admin</h1>
         <span className="text-xs px-2 py-1 bg-gray-100 text-gray-500 rounded">Manage Teams & Members</span>
