@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useUser } from '../App';
 import { getReports, saveReport } from '../api';
 import { exportToWord } from '../exportWord';
@@ -25,7 +25,6 @@ type Tab = 'edit' | 'history';
 
 export default function MemberReport() {
   const { user } = useUser();
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const week = searchParams.get('week') || prevWeek(getCurrentWeek());
 
@@ -197,12 +196,6 @@ export default function MemberReport() {
               {user?.member_name} · {user?.team_name}
             </p>
           </div>
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition"
-          >
-            ← Exit
-          </button>
         </div>
 
         {/* Bottom row: tabs + copy + search + week */}

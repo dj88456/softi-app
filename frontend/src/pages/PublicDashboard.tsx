@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { getConsolidated } from '../api';
 import { prevWeek, nextWeek, getCurrentWeek, getWeekDateRange, formatWeek } from '../utils';
 import type { ConsolidatedReport } from '../types';
@@ -83,18 +83,23 @@ const SECTIONS: {
 
 // ─── Item renderer ─────────────────────────────────────────────────────────────
 
-function ItemBlock({ text }: { text: string }) {
+function ItemBlock({ text, index, badgeClass }: { text: string; index: number; badgeClass: string }) {
   const lines = text.split('\n').filter(l => l.trim());
   if (lines.length === 0) return null;
   return (
-    <div className="mb-3 last:mb-0">
-      <div className="font-semibold text-gray-800 leading-snug">{lines[0]}</div>
-      {lines.slice(1).map((line, i) => (
-        <div key={i} className="flex items-start gap-1.5 mt-1 pl-1">
-          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-300 flex-shrink-0" />
-          <span className="text-gray-600 text-sm leading-snug">{line}</span>
-        </div>
-      ))}
+    <div className="mb-3 last:mb-0 flex items-start gap-2">
+      <span className={`mt-0.5 w-5 h-5 rounded-full flex-shrink-0 ${badgeClass} text-white text-xs font-bold flex items-center justify-center`}>
+        {index + 1}
+      </span>
+      <div className="flex-1">
+        <div className="font-semibold text-gray-800 leading-snug">{lines[0]}</div>
+        {lines.slice(1).map((line, i) => (
+          <div key={i} className="flex items-start gap-1.5 mt-1 pl-1">
+            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-300 flex-shrink-0" />
+            <span className="text-gray-600 text-sm leading-snug">{line}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -102,6 +107,7 @@ function ItemBlock({ text }: { text: string }) {
 // ─── Main component ────────────────────────────────────────────────────────────
 
 export default function PublicDashboard() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const week = searchParams.get('week') || prevWeek(getCurrentWeek());
   const dateRange = getWeekDateRange(week);
@@ -158,7 +164,7 @@ export default function PublicDashboard() {
               <div className="text-indigo-200 text-sm">{dateRange}</div>
             </div>
 
-            {/* Week navigation */}
+            {/* Week navigation + exit */}
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setSearchParams({ week: prevWeek(week) })}
@@ -174,6 +180,12 @@ export default function PublicDashboard() {
                 className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold transition"
               >
                 Next ►
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-sm font-semibold transition"
+              >
+                ← Exit
               </button>
             </div>
           </div>
@@ -278,7 +290,7 @@ export default function PublicDashboard() {
                             </div>
                             {/* Items */}
                             <div className="px-4 py-3">
-                              {items.map((item, i) => <ItemBlock key={i} text={item} />)}
+                              {items.map((item, i) => <ItemBlock key={i} text={item} index={i} badgeClass={s.header} />)}
                             </div>
                           </div>
                         );
