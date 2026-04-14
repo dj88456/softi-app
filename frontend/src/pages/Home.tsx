@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useUser } from '../App';
 import { getTeams, getMembers } from '../api';
 import type { Team, Member, UserRole } from '../types';
@@ -84,17 +84,21 @@ export default function Home() {
 
   return (
     <div className="max-w-2xl mx-auto mt-8">
-      {/* Header */}
-      <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-3 bg-indigo-700 text-white px-6 py-3 rounded-2xl shadow-lg mb-4">
-          <span className="text-3xl font-bold">BTS</span>
-          <div className="text-left">
-            <div className="text-sm font-semibold leading-none">Department</div>
-            <div className="text-indigo-200 text-xs">SOFTI Weekly Report</div>
-          </div>
-        </div>
-        <h1 className="text-2xl font-bold text-gray-800">Welcome</h1>
-        <p className="text-gray-500 mt-1">Select your role to get started</p>
+
+      {/* ── Hero: public dashboard entry point ─────────────────────────────── */}
+      <Link
+        to="/view"
+        className="block w-full mb-8 rounded-2xl bg-indigo-700 hover:bg-indigo-600 text-white text-center py-8 px-6 shadow-xl transition group"
+      >
+        <div className="text-xs font-semibold tracking-widest text-indigo-300 uppercase mb-2">BTS Department</div>
+        <div className="text-3xl font-black tracking-tight mb-1">BTS SOFTI REPORT</div>
+        <div className="text-indigo-200 text-sm">View this week's published team reports →</div>
+      </Link>
+
+      {/* ── Login section ───────────────────────────────────────────────────── */}
+      <div className="text-center mb-6">
+        <h1 className="text-lg font-bold text-gray-700">Sign in</h1>
+        <p className="text-gray-400 text-sm mt-0.5">Select your role to get started</p>
       </div>
 
       {/* Step 1: Role Selection */}
