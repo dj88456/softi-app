@@ -157,7 +157,7 @@ export default function PublicDashboard() {
           <div className="flex flex-wrap items-center justify-between gap-4">
             {/* Title */}
             <div>
-              <div className="font-black text-2xl tracking-tight">BTS EA SOFTI Weekly Report</div>
+              <div className="font-black text-2xl tracking-tight">BTS SOFTI Weekly Report</div>
               <div className="text-white font-bold text-base mt-1">{dateRange}</div>
             </div>
 
