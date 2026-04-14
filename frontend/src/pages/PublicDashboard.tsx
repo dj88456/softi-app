@@ -164,26 +164,29 @@ export default function PublicDashboard() {
               <div className="text-indigo-200 text-sm">{dateRange}</div>
             </div>
 
-            {/* Week navigation + exit */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setSearchParams({ week: prevWeek(week) })}
-                className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold transition"
-              >
-                ◄ Prev
-              </button>
-              <span className="px-3 py-1.5 rounded-lg bg-indigo-800 text-sm font-bold tabular-nums min-w-[90px] text-center">
-                {formatWeek(week)}
-              </span>
-              <button
-                onClick={() => setSearchParams({ week: nextWeek(week) })}
-                className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold transition"
-              >
-                Next ►
-              </button>
+            <div className="flex items-center gap-6">
+              {/* Week navigation */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setSearchParams({ week: prevWeek(week) })}
+                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold transition"
+                >
+                  ◄ Prev
+                </button>
+                <span className="px-3 py-1.5 rounded-lg bg-indigo-800 text-sm font-bold tabular-nums min-w-[90px] text-center">
+                  {formatWeek(week)}
+                </span>
+                <button
+                  onClick={() => setSearchParams({ week: nextWeek(week) })}
+                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold transition"
+                >
+                  Next ►
+                </button>
+              </div>
+              {/* Exit */}
               <button
                 onClick={() => navigate('/')}
-                className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-sm font-semibold transition"
+                className="px-4 py-1.5 rounded-lg bg-white text-indigo-700 text-sm font-bold hover:bg-indigo-50 transition shadow-sm"
               >
                 ← Exit
               </button>
