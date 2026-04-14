@@ -88,13 +88,24 @@ interface RichTextInputProps {
   placeholder?: string;
   className?: string;
   textareaRef?: React.RefObject<HTMLTextAreaElement>;
+  focusOnMount?: boolean;
 }
 
 function RichTextInput({
-  value, onChange, onKeyDown, onBlur, placeholder, className, textareaRef,
+  value, onChange, onKeyDown, onBlur, placeholder, className, textareaRef, focusOnMount,
 }: RichTextInputProps) {
   const internalRef = useRef<HTMLTextAreaElement>(null);
   const ref = textareaRef ?? internalRef;
+
+  useEffect(() => {
+    if (focusOnMount && ref.current) {
+      ref.current.focus();
+      // Place cursor at end
+      const len = ref.current.value.length;
+      ref.current.setSelectionRange(len, len);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (ref.current) {
@@ -295,6 +306,7 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
                 onChange={v => editItem(i, v)}
                 onBlur={() => setEditingIdx(null)}
                 className="flex-1"
+                focusOnMount
               />
             ) : (
               <div
