@@ -155,6 +155,8 @@ function RichTextInput({
         onKeyDown={handleKeyDown}
         onBlur={() => onBlur?.()}
         placeholder={placeholder}
+        spellCheck={true}
+        lang="en"
         className="w-full resize-none overflow-hidden bg-transparent px-2.5 py-2 text-base focus:outline-none"
       />
     </div>
