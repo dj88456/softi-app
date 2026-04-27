@@ -75,8 +75,9 @@ export async function exportToWord(params: {
   memberName: string;
   teamName: string;
   data: SOFTIData;
+  isGroup?: boolean;
 }): Promise<void> {
-  const { week, memberName, teamName, data } = params;
+  const { week, memberName, teamName, data, isGroup } = params;
   const dateRange = weekToDateRange(week);
 
   const PT = 20; // 1pt = 20 twips
@@ -95,7 +96,7 @@ export async function exportToWord(params: {
     new Paragraph({
       spacing: { after: 16 * PT },
       children: [
-        new TextRun({ text: `EA SOFTI - ${dateRange}`, bold: true, size: SIZE_BODY + 4, color: '111827' }),
+        new TextRun({ text: `${isGroup ? 'EA ' : ''}SOFTI - ${dateRange}`, bold: true, size: SIZE_BODY + 4, color: '111827' }),
       ],
     }),
   );

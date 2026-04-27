@@ -324,6 +324,7 @@ export default function TeamConsolidation() {
         memberName: user?.team_name ?? 'Team',
         teamName: user?.team_name ?? '',
         data: consolidated,
+        isGroup: true,
       });
     } finally {
       setExporting(false);
