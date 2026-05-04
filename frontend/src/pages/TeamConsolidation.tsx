@@ -391,15 +391,18 @@ export default function TeamConsolidation() {
       return lines.filter(l => { const k = l.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
     }
 
+    const DOC_REVIEWED_RE = /\bdocuments?\s+review(?:ed)?\b|\breview(?:ed)?\s+documents?\b/i;
+    const DOC_APPROVED_RE = /\bdocuments?\s+approv(?:ed|al)?\b|\bapprov(?:ed|al)?\s+documents?\b/i;
+
     const reviewedLines: string[] = [];
     const approvedLines: string[] = [];
 
     merged.successes = merged.successes.filter(item => {
-      const hasReviewed = /documents?\s+reviewed/i.test(item);
-      const hasApproved = /documents?\s+approved/i.test(item);
+      const hasReviewed = DOC_REVIEWED_RE.test(item);
+      const hasApproved = DOC_APPROVED_RE.test(item);
       if (!hasReviewed && !hasApproved) return true;
-      if (hasReviewed) { const l = extractLine(item, /documents?\s+reviewed/i); if (l) reviewedLines.push(l); }
-      if (hasApproved) { const l = extractLine(item, /documents?\s+approved/i); if (l) approvedLines.push(l); }
+      if (hasReviewed) { const l = extractLine(item, DOC_REVIEWED_RE); if (l) reviewedLines.push(l); }
+      if (hasApproved) { const l = extractLine(item, DOC_APPROVED_RE); if (l) approvedLines.push(l); }
       dropped.push({ member_name: '(merged)', section: 'successes', item, reason: 'doc_merged' });
       return false;
     });
