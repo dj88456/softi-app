@@ -28,15 +28,23 @@ interface DroppedItem {
   member_name: string;
   section: SectionKey;
   item: string;
-  reason: 'learnings' | 'na_replaced' | 'duplicate' | 'doc_merged';
+  reason: 'learnings' | 'na_replaced' | 'duplicate' | 'doc_merged' | 'similar_merged';
 }
 
 const DROPPED_REASON_LABEL: Record<DroppedItem['reason'], string> = {
-  learnings:   'Learnings (skipped)',
-  na_replaced: 'N/A (removed — section has real content)',
-  duplicate:   'Duplicate (already imported from another member)',
-  doc_merged:  'Merged into Documents Reviewed / Approved summary',
+  learnings:      'Learnings (skipped)',
+  na_replaced:    'N/A (removed — section has real content)',
+  duplicate:      'Duplicate (already imported from another member)',
+  doc_merged:     'Merged into Documents Reviewed / Approved summary',
+  similar_merged: 'Merged with similar item',
 };
+
+interface SimilarPair {
+  section: SectionKey;
+  item1: string;
+  item2: string;
+  score: number;
+}
 
 // ── Paste parser ───────────────────────────────────────────────────────────────
 
@@ -189,6 +197,8 @@ export default function TeamConsolidation() {
   const [loading, setLoading]             = useState(true);
   const [showMemberPicker, setShowMemberPicker] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [similarPairs, setSimilarPairs] = useState<SimilarPair[]>([]);
+  const [showSimilarModal, setShowSimilarModal] = useState(false);
 
   // ── History tab state ──────────────────────────────────────────────────────
   const [historyReports, setHistoryReports]   = useState<ConsolidatedReport[]>([]);
@@ -336,6 +346,18 @@ export default function TeamConsolidation() {
     return norm === 'na' || norm === 'none' || norm === 'nil';
   }
 
+  function jaccardSimilarity(a: string, b: string): number {
+    const toWords = (s: string) => new Set(
+      s.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).filter(w => w.length > 1)
+    );
+    const wa = toWords(a);
+    const wb = toWords(b);
+    if (wa.size === 0 || wb.size === 0) return 0;
+    const intersection = [...wa].filter(w => wb.has(w)).length;
+    const union = new Set([...wa, ...wb]).size;
+    return intersection / union;
+  }
+
   function importAllReports() {
     const merged: SOFTIData = { successes: [], opportunities: [], failures: [], threats: [], issues: [] };
     const dropped: DroppedItem[] = [];
@@ -412,6 +434,23 @@ export default function TeamConsolidation() {
     if (dedupedReviewed.length > 0) merged.successes.push(`Documents Reviewed\n${dedupedReviewed.join('\n')}`);
     if (dedupedApproved.length > 0) merged.successes.push(`Documents Approved\n${dedupedApproved.join('\n')}`);
 
+    // Step 4: Find similar (non-identical) items for manual review
+    const SIMILARITY_THRESHOLD = 0.55;
+    const similarFound: SimilarPair[] = [];
+    for (const s of SECTIONS) {
+      const items = merged[s];
+      for (let i = 0; i < items.length; i++) {
+        for (let j = i + 1; j < items.length; j++) {
+          const score = jaccardSimilarity(items[i], items[j]);
+          if (score >= SIMILARITY_THRESHOLD) {
+            similarFound.push({ section: s, item1: items[i], item2: items[j], score });
+          }
+        }
+      }
+    }
+    setSimilarPairs(similarFound);
+    if (similarFound.length > 0) setShowSimilarModal(true);
+
     setConsolidated(merged);
     setSave('idle');
     setDroppedItems(dropped);
@@ -422,6 +461,27 @@ export default function TeamConsolidation() {
       saveConsolidated({ team_id: user.team_id, week, data: merged, status: 'draft' })
         .catch(e => console.error('Auto-save draft failed:', e));
     }
+  }
+
+  function handleSimilarKeep(pair: SimilarPair, dropItem: string) {
+    setConsolidated(prev => ({
+      ...prev,
+      [pair.section]: prev[pair.section].filter(x => x !== dropItem),
+    }));
+    setDroppedItems(prev => [...prev, { member_name: '(similar)', section: pair.section, item: dropItem, reason: 'similar_merged' as const }]);
+    setSimilarPairs(prev => {
+      const next = prev.filter(p => !(p.section === pair.section && (p.item1 === dropItem || p.item2 === dropItem)));
+      if (next.length === 0) setShowSimilarModal(false);
+      return next;
+    });
+  }
+
+  function handleSimilarKeepBoth(pair: SimilarPair) {
+    setSimilarPairs(prev => {
+      const next = prev.filter(p => p !== pair);
+      if (next.length === 0) setShowSimilarModal(false);
+      return next;
+    });
   }
 
   function restoreDropped(d: DroppedItem) {
@@ -898,6 +958,73 @@ export default function TeamConsolidation() {
               <span className="text-sm text-gray-400">{droppedItems.length} item{droppedItems.length !== 1 ? 's' : ''} remaining</span>
               <button
                 onClick={() => setShowDropped(false)}
+                className="px-5 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm font-semibold transition"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Similar items review modal ── */}
+      {showSimilarModal && similarPairs.length > 0 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
+
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Similar Items Found</h2>
+                <p className="text-sm text-gray-400 mt-0.5">
+                  {similarPairs.length} pair{similarPairs.length !== 1 ? 's' : ''} of similar items detected — choose which to keep, or keep both.
+                </p>
+              </div>
+              <button onClick={() => setShowSimilarModal(false)} className="text-gray-400 hover:text-gray-600 text-xl font-bold">×</button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+              {similarPairs.map((pair, idx) => (
+                <div key={idx} className="border border-amber-200 rounded-xl bg-amber-50 p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">{pair.section}</span>
+                    <span className="text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full font-semibold">
+                      {Math.round(pair.score * 100)}% similar
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-white border border-gray-200 rounded-lg p-3 flex flex-col">
+                      <p className="text-sm text-gray-700 whitespace-pre-line flex-1 mb-3">{pair.item1}</p>
+                      <button
+                        onClick={() => handleSimilarKeep(pair, pair.item2)}
+                        className="w-full px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition"
+                      >
+                        Keep this
+                      </button>
+                    </div>
+                    <div className="bg-white border border-gray-200 rounded-lg p-3 flex flex-col">
+                      <p className="text-sm text-gray-700 whitespace-pre-line flex-1 mb-3">{pair.item2}</p>
+                      <button
+                        onClick={() => handleSimilarKeep(pair, pair.item1)}
+                        className="w-full px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition"
+                      >
+                        Keep this
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleSimilarKeepBoth(pair)}
+                    className="mt-2 w-full px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-600 text-xs font-semibold hover:bg-gray-50 transition"
+                  >
+                    Keep both
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+              <span className="text-sm text-gray-400">{similarPairs.length} pair{similarPairs.length !== 1 ? 's' : ''} remaining</span>
+              <button
+                onClick={() => setShowSimilarModal(false)}
                 className="px-5 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm font-semibold transition"
               >
                 Done
