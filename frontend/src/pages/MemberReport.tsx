@@ -281,6 +281,7 @@ export default function MemberReport() {
                     section={s}
                     items={data[s]}
                     onChange={items => setSection(s, items)}
+                    canReorder
                     highlight={search}
                   />
                 ))}
