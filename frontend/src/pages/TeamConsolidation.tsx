@@ -555,7 +555,7 @@ export default function TeamConsolidation() {
           <div className="flex items-center gap-1">
             <button
               onClick={() => setTab('consolidate')}
-              className={`px-4 py-2 text-base font-semibold rounded-t-lg border-b-2 transition ${
+              className={`px-4 py-2.5 text-base font-semibold rounded-t-lg border-b-2 transition ${
                 tab === 'consolidate'
                   ? 'border-indigo-600 text-indigo-700 bg-indigo-50'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -565,7 +565,7 @@ export default function TeamConsolidation() {
             </button>
             <button
               onClick={() => setTab('history')}
-              className={`px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 transition ${
+              className={`px-4 py-2.5 text-sm font-medium rounded-t-lg border-b-2 transition ${
                 tab === 'history'
                   ? 'border-indigo-600 text-indigo-700 bg-indigo-50'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -605,13 +605,13 @@ export default function TeamConsolidation() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <div className="flex bg-gray-100 rounded-lg p-1 gap-1">
-              <button onClick={() => setHistoryFilter('all')} className={`px-3 py-1 rounded-md text-xs font-semibold transition ${historyFilter === 'all' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>All</button>
-              <button onClick={() => setHistoryFilter('draft')} className={`px-3 py-1 rounded-md text-xs font-semibold transition ${historyFilter === 'draft' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>Drafts only</button>
+              <button onClick={() => setHistoryFilter('all')} className={`px-3 py-1.5 rounded-md text-xs font-semibold transition ${historyFilter === 'all' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>All</button>
+              <button onClick={() => setHistoryFilter('draft')} className={`px-3 py-1.5 rounded-md text-xs font-semibold transition ${historyFilter === 'draft' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>Drafts only</button>
             </div>
             <button
               onClick={handleExportYear}
               disabled={exportingYear}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-sm font-semibold text-gray-700 hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-semibold text-gray-700 hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {exportingYear ? 'Exporting…' : `↓ Export ${new Date().getFullYear()} Reports`}
             </button>
@@ -647,7 +647,7 @@ export default function TeamConsolidation() {
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <button
                           onClick={e => { e.stopPropagation(); navigate(`/consolidation?week=${encodeURIComponent(r.week)}`); setTab('consolidate'); }}
-                          className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition"
+                          className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition"
                         >
                           ✎ Open in Editor
                         </button>
@@ -694,7 +694,7 @@ export default function TeamConsolidation() {
                   <div className="relative">
                     <button
                       onClick={() => setShowMemberPicker(v => !v)}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition"
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition"
                       title="Enter report for any member"
                     >
                       + Enter Report
@@ -749,14 +749,14 @@ export default function TeamConsolidation() {
                         <div className="mr-2 flex items-center gap-1 flex-shrink-0">
                           <button
                             onClick={e => { e.stopPropagation(); openPasteModal(report.member_id, report.member_name ?? ''); }}
-                            className="px-2 py-1 rounded text-xs font-semibold bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition"
+                            className="px-2.5 py-1.5 rounded text-xs font-semibold bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition"
                             title="Paste & auto-classify report for this member"
                           >
                             ✎ Enter
                           </button>
                           <button
                             onClick={e => { e.stopPropagation(); handleDeleteReport(report.member_id, report.member_name ?? ''); }}
-                            className="px-2 py-1 rounded text-xs font-semibold bg-red-100 text-red-600 hover:bg-red-200 transition"
+                            className="px-2.5 py-1.5 rounded text-xs font-semibold bg-red-100 text-red-600 hover:bg-red-200 transition"
                             title="Delete this member's report"
                           >
                             ✕
@@ -794,7 +794,7 @@ export default function TeamConsolidation() {
                   {memberReports.length > 0 && (
                     <button
                       onClick={importAllReports}
-                      className="flex items-center gap-1 px-3 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-xs font-semibold transition"
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-xs font-semibold transition"
                       title="Import all member reports into consolidated (skips duplicates)"
                     >
                       ↙ Import All
@@ -802,7 +802,7 @@ export default function TeamConsolidation() {
                   )}
                   <button
                     onClick={() => setShowClearConfirm(true)}
-                    className="flex items-center px-1.5 py-1 rounded border border-red-200 text-red-500 text-xs transition hover:bg-red-50"
+                    className="flex items-center px-2 py-1.5 rounded border border-red-200 text-red-500 text-xs transition hover:bg-red-50"
                     title="Clear all consolidated content"
                   >
                     ✕
@@ -810,7 +810,7 @@ export default function TeamConsolidation() {
                   {droppedItems.length > 0 && !showDropped && (
                     <button
                       onClick={() => setShowDropped(true)}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-700 text-xs font-semibold transition"
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-700 text-xs font-semibold transition"
                       title="Review items filtered during import"
                     >
                       ⚠ {droppedItems.length} dropped
@@ -849,21 +849,21 @@ export default function TeamConsolidation() {
                 <button
                   onClick={handleExport}
                   disabled={exporting || SECTIONS.every(s => consolidated[s].length === 0)}
-                  className="px-5 py-2 rounded-lg border-2 border-gray-300 text-gray-700 hover:bg-gray-100 text-sm font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-lg border-2 border-gray-300 text-gray-700 hover:bg-gray-100 text-sm font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {exporting ? 'Exporting…' : '↓ Export to Word'}
                 </button>
                 <button
                   onClick={() => handleSave('draft')}
                   disabled={saveState === 'saving'}
-                  className="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 text-sm font-medium transition disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 text-sm font-medium transition disabled:opacity-50"
                 >
                   Save Draft
                 </button>
                 <button
                   onClick={() => handleSave('submitted')}
                   disabled={saveState === 'saving'}
-                  className="px-5 py-2 rounded-lg bg-indigo-700 hover:bg-indigo-600 text-white text-sm font-semibold transition disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-lg bg-indigo-700 hover:bg-indigo-600 text-white text-sm font-semibold transition disabled:opacity-50"
                 >
                   {isSubmitted ? 'Re-submit' : 'Submit to Secretary'}
                 </button>
@@ -923,14 +923,14 @@ export default function TeamConsolidation() {
 
             {/* Modal footer */}
             <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100">
-              <button onClick={closePasteModal} className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+              <button onClick={closePasteModal} className="px-5 py-2.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                 Cancel
               </button>
               {!parsed ? (
                 <button
                   onClick={handleParse}
                   disabled={!pasteText.trim()}
-                  className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition disabled:opacity-40"
+                  className="px-6 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition disabled:opacity-40"
                 >
                   Parse →
                 </button>
@@ -938,7 +938,7 @@ export default function TeamConsolidation() {
                 <button
                   onClick={handleSaveForMember}
                   disabled={pasteStatus === 'saving'}
-                  className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold transition disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold transition disabled:opacity-50"
                 >
                   {pasteStatus === 'saving' ? 'Saving…' : pasteStatus === 'saved' ? '✓ Saved!' : pasteStatus === 'error' ? '✗ Error' : 'Save as Submitted'}
                 </button>
@@ -978,7 +978,7 @@ export default function TeamConsolidation() {
                   </div>
                   <button
                     onClick={() => restoreDropped(d)}
-                    className="flex-shrink-0 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition"
+                    className="flex-shrink-0 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition"
                   >
                     ↩ Restore
                   </button>
@@ -990,7 +990,7 @@ export default function TeamConsolidation() {
               <span className="text-sm text-gray-400">{droppedItems.length} item{droppedItems.length !== 1 ? 's' : ''} remaining</span>
               <button
                 onClick={() => setShowDropped(false)}
-                className="px-5 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm font-semibold transition"
+                className="px-6 py-2.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm font-semibold transition"
               >
                 Done
               </button>
@@ -1028,7 +1028,7 @@ export default function TeamConsolidation() {
                       <p className="text-sm text-gray-700 whitespace-pre-line flex-1 mb-3">{pair.item1}</p>
                       <button
                         onClick={() => handleSimilarKeep(pair, pair.item2)}
-                        className="w-full px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition"
+                        className="w-full px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition"
                       >
                         Keep this
                       </button>
@@ -1037,7 +1037,7 @@ export default function TeamConsolidation() {
                       <p className="text-sm text-gray-700 whitespace-pre-line flex-1 mb-3">{pair.item2}</p>
                       <button
                         onClick={() => handleSimilarKeep(pair, pair.item1)}
-                        className="w-full px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition"
+                        className="w-full px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition"
                       >
                         Keep this
                       </button>
@@ -1045,7 +1045,7 @@ export default function TeamConsolidation() {
                   </div>
                   <button
                     onClick={() => handleSimilarKeepBoth(pair)}
-                    className="mt-2 w-full px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-600 text-xs font-semibold hover:bg-gray-50 transition"
+                    className="mt-2 w-full px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-600 text-xs font-semibold hover:bg-gray-50 transition"
                   >
                     Keep both
                   </button>
@@ -1057,7 +1057,7 @@ export default function TeamConsolidation() {
               <span className="text-sm text-gray-400">{similarPairs.length} pair{similarPairs.length !== 1 ? 's' : ''} remaining</span>
               <button
                 onClick={() => setShowSimilarModal(false)}
-                className="px-5 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm font-semibold transition"
+                className="px-6 py-2.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm font-semibold transition"
               >
                 Done
               </button>

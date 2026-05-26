@@ -116,12 +116,12 @@ export default function WeekSelector({ week, onChange }: Props) {
       <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl shadow-sm px-1.5 py-1.5">
         <button
           onClick={e => { e.stopPropagation(); handleWeekNav(prevWeek(week)); }}
-          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 text-lg transition"
+          className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 text-lg transition"
         >‹</button>
 
         <button
           onClick={() => setOpen(o => !o)}
-          className="flex flex-col items-center px-3 py-1 rounded-lg hover:bg-gray-50 transition min-w-[180px]"
+          className="flex flex-col items-center px-3 py-1.5 rounded-lg hover:bg-gray-50 transition min-w-[180px]"
         >
           <span className="text-sm font-bold text-gray-800">{formatWeek(week)}</span>
           <span className="text-sm text-gray-400">{getWeekDateRange(week)}</span>
@@ -129,7 +129,7 @@ export default function WeekSelector({ week, onChange }: Props) {
 
         <button
           onClick={e => { e.stopPropagation(); handleWeekNav(nextWeek(week)); }}
-          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 text-lg transition"
+          className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 text-lg transition"
         >›</button>
       </div>
 
@@ -140,10 +140,10 @@ export default function WeekSelector({ week, onChange }: Props) {
           {/* Month nav */}
           <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100">
             <button onClick={prevMonth}
-              className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 text-gray-500 transition">‹</button>
+              className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 text-gray-500 transition">‹</button>
             <span className="text-sm font-bold text-gray-700">{MONTH_NAMES[viewMonth]} {viewYear}</span>
             <button onClick={nextMonth}
-              className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 text-gray-500 transition">›</button>
+              className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 text-gray-500 transition">›</button>
           </div>
 
           {/* Back to default */}
