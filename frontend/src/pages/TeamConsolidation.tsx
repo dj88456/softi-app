@@ -791,13 +791,6 @@ export default function TeamConsolidation() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-semibold text-gray-700">Consolidated Report</h2>
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setShowClearConfirm(true)}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 text-xs font-semibold transition"
-                    title="Clear all consolidated content"
-                  >
-                    ✕ Clear
-                  </button>
                   {memberReports.length > 0 && (
                     <button
                       onClick={importAllReports}
@@ -807,6 +800,13 @@ export default function TeamConsolidation() {
                       ↙ Import All
                     </button>
                   )}
+                  <button
+                    onClick={() => setShowClearConfirm(true)}
+                    className="flex items-center gap-1 px-1.5 py-0.5 rounded border border-red-200 text-red-500 text-xs transition hover:bg-red-50"
+                    title="Clear all consolidated content"
+                  >
+                    ✕ Clear
+                  </button>
                   {droppedItems.length > 0 && !showDropped && (
                     <button
                       onClick={() => setShowDropped(true)}
