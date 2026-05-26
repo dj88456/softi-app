@@ -8,7 +8,7 @@ import type { WeeklyReport, SOFTIData, Member, ConsolidatedReport } from '../typ
 import WeekSelector from '../components/WeekSelector';
 import { SOFTISectionEditable, SOFTISectionReadOnly } from '../components/SOFTISection';
 import type { SectionKey } from '../components/SOFTISection';
-import { exportToWord } from '../exportWord';
+import { exportToWord, exportYearToWord } from '../exportWord';
 
 type Tab = 'consolidate' | 'history';
 
@@ -322,6 +322,31 @@ export default function TeamConsolidation() {
       setTimeout(() => { closePasteModal(); load(); }, 1000);
     } catch {
       setPasteStatus('error');
+    }
+  }
+
+  const [exportingYear, setExportingYear] = useState(false);
+  async function handleExportYear() {
+    if (!user?.team_id) return;
+    setExportingYear(true);
+    try {
+      const year = new Date().getFullYear();
+      const all = await getConsolidated({ team_id: user.team_id });
+      const yearReports = all
+        .filter(r => r.week.startsWith(String(year)) && r.status !== 'draft')
+        .sort((a, b) => a.week.localeCompare(b.week));
+      if (yearReports.length === 0) {
+        alert(`No submitted reports found for ${year}.`);
+        return;
+      }
+      await exportYearToWord({
+        year,
+        entries: yearReports.map(r => ({ week: r.week, teams: [{ name: r.team_name ?? user.team_name ?? 'Team', data: r.data }] })),
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setExportingYear(false);
     }
   }
 
@@ -814,6 +839,13 @@ export default function TeamConsolidation() {
 
               {/* Action Buttons */}
               <div className="flex gap-3 mt-4 justify-end border-t border-gray-100 pt-4 flex-wrap">
+                <button
+                  onClick={handleExportYear}
+                  disabled={exportingYear}
+                  className="px-5 py-2 rounded-lg border-2 border-gray-300 text-gray-700 hover:bg-gray-100 text-sm font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {exportingYear ? 'Exporting…' : `↓ Export ${new Date().getFullYear()} Reports`}
+                </button>
                 <button
                   onClick={handleExport}
                   disabled={exporting || SECTIONS.every(s => consolidated[s].length === 0)}

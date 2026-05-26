@@ -6,7 +6,6 @@ import type { ConsolidatedReport } from '../types';
 import WeekSelector from '../components/WeekSelector';
 import { SOFTISectionReadOnly } from '../components/SOFTISection';
 import type { SectionKey } from '../components/SOFTISection';
-import { exportYearToWord } from '../exportWord';
 
 const SECTIONS: SectionKey[] = ['successes', 'opportunities', 'failures', 'threats', 'issues'];
 
@@ -35,41 +34,6 @@ export default function SecretaryDashboard() {
       localStorage.setItem('sec_auto_approve', String(next));
       return next;
     });
-  }
-
-  // Year export
-  const [exportingYear, setExportingYear] = useState(false);
-
-  async function handleExportYear() {
-    setExportingYear(true);
-    try {
-      const year = new Date().getFullYear();
-      const all = await getConsolidated({});
-      const yearPublished = all
-        .filter(r => r.week.startsWith(String(year)) && r.status === 'published')
-        .sort((a, b) => a.week.localeCompare(b.week));
-
-      if (yearPublished.length === 0) {
-        alert(`No published reports found for ${year}.`);
-        return;
-      }
-
-      // Group by week, preserving sort order
-      const weekMap = new Map<string, { name: string; data: typeof yearPublished[0]['data'] }[]>();
-      for (const r of yearPublished) {
-        if (!weekMap.has(r.week)) weekMap.set(r.week, []);
-        weekMap.get(r.week)!.push({ name: r.team_name ?? 'Team', data: r.data });
-      }
-
-      await exportYearToWord({
-        year,
-        entries: [...weekMap.entries()].map(([w, teams]) => ({ week: w, teams })),
-      });
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setExportingYear(false);
-    }
   }
 
   const load = useCallback(async () => {
@@ -146,15 +110,6 @@ export default function SecretaryDashboard() {
           >
             <span className={`w-3 h-3 rounded-full flex-shrink-0 ${autoApprove ? 'bg-emerald-500' : 'bg-gray-400'}`} />
             Auto-approve {autoApprove ? 'On' : 'Off'}
-          </button>
-
-          {/* Year export */}
-          <button
-            onClick={handleExportYear}
-            disabled={exportingYear}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-sm font-semibold text-gray-700 hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {exportingYear ? 'Exporting…' : `↓ Export ${new Date().getFullYear()} Reports`}
           </button>
 
           <WeekSelector week={week} onChange={w => setSearchParams({ week: w })} />
