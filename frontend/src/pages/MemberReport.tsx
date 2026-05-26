@@ -223,12 +223,12 @@ export default function MemberReport() {
 
           <div className="flex-1" />
 
-          <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
+          <span className={`text-sm px-3 py-1 rounded-full font-semibold ${
             isSubmitted ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
           }`}>
             {isSubmitted ? '✓ Submitted' : 'Draft'}
           </span>
-          <span className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-500 font-medium">
+          <span className="text-sm px-3 py-1 rounded-full bg-gray-100 text-gray-500 font-medium">
             {totalItems} item{totalItems !== 1 ? 's' : ''}
           </span>
           {saveState === 'saving'              && <span className="text-xs text-gray-400 font-medium">Saving…</span>}
@@ -243,15 +243,15 @@ export default function MemberReport() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search…"
-            className="h-8 px-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-32 transition"
+            className="h-9 px-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-40 transition"
           />
           <button
             onClick={handleCopyLastWeek}
             disabled={copyingLastWeek || loading}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-gray-300 text-xs font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-400 transition disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-sm font-medium text-gray-500 hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed"
             title={`Copy content from ${prevWeek(week)}`}
           >
-            {copyingLastWeek ? 'Copying…' : `↑ ${prevWeek(week)}`}
+            {copyingLastWeek ? 'Copying…' : `↑ Copy`}
           </button>
           <WeekSelector week={week} onChange={w => setSearchParams({ week: w })} />
         </div>
