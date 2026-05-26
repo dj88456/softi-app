@@ -221,6 +221,19 @@ export default function MemberReport() {
             History
           </button>
 
+          <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
+            isSubmitted ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+          }`}>
+            {isSubmitted ? '✓ Submitted' : 'Draft'}
+          </span>
+          <span className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-500 font-medium">
+            {totalItems} item{totalItems !== 1 ? 's' : ''}
+          </span>
+          {saveState === 'saving'              && <span className="text-xs text-gray-400 font-medium">Saving…</span>}
+          {saveState === 'error'               && <span className="text-xs text-red-600 font-semibold">✗ Save failed</span>}
+          {saveState !== 'saving' && hasUnsaved && <span className="text-xs text-gray-400 font-medium">Auto-saving…</span>}
+          {!hasUnsaved && saveState === 'saved' && <span className="text-xs text-emerald-600 font-semibold">✓ Saved</span>}
+
           <div className="flex-1" />
 
           <button
@@ -254,21 +267,6 @@ export default function MemberReport() {
       {/* ── EDIT TAB ── */}
       {tab === 'edit' && (
         <>
-          {/* Status bar */}
-          <div className={`rounded-xl px-5 py-3 mb-3 flex items-center justify-between text-base font-semibold ${
-            isSubmitted ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
-                        : 'bg-amber-50 border border-amber-200 text-amber-700'
-          }`}>
-            <span>
-              Status: <strong>{isSubmitted ? 'Submitted' : 'Draft'}</strong>
-              {' · '}{totalItems} item{totalItems !== 1 ? 's' : ''} total
-            </span>
-            {saveState === 'saving'               && <span className="text-gray-500 text-sm font-medium">Saving…</span>}
-            {saveState === 'error'                && <span className="text-red-600 text-sm font-semibold">✗ Save failed</span>}
-            {saveState !== 'saving' && hasUnsaved  && <span className="text-gray-400 text-sm font-medium">Auto-saving…</span>}
-            {!hasUnsaved && saveState === 'saved'  && <span className="text-emerald-600 text-sm font-semibold">✓ Saved</span>}
-          </div>
-
           {loading ? (
             <div className="text-center py-12 text-gray-400">Loading…</div>
           ) : (
