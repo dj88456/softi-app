@@ -251,7 +251,7 @@ export default function MemberReport() {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-sm font-medium text-gray-500 hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed"
             title={`Copy content from ${prevWeek(week)}`}
           >
-            {copyingLastWeek ? 'Copying…' : `↑ Copy`}
+            {copyingLastWeek ? 'Copying…' : `↑ Copy last week (${prevWeek(week)})`}
           </button>
           <WeekSelector week={week} onChange={w => setSearchParams({ week: w })} />
         </div>
