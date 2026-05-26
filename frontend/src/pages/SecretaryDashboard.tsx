@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getConsolidated, publishConsolidated } from '../api';
 import { getCurrentWeek, prevWeek } from '../utils';
@@ -6,6 +6,7 @@ import type { ConsolidatedReport } from '../types';
 import WeekSelector from '../components/WeekSelector';
 import { SOFTISectionReadOnly } from '../components/SOFTISection';
 import type { SectionKey } from '../components/SOFTISection';
+import { exportYearToWord } from '../exportWord';
 
 const SECTIONS: SectionKey[] = ['successes', 'opportunities', 'failures', 'threats', 'issues'];
 
@@ -15,18 +16,82 @@ export default function SecretaryDashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const week = searchParams.get('week') || prevWeek(getCurrentWeek());
 
-  const [reports, setReports]     = useState<ConsolidatedReport[]>([]);
-  const [loading, setLoading]     = useState(true);
-  const [expanded, setExpanded]   = useState<Set<number>>(new Set());
+  const [reports, setReports]       = useState<ConsolidatedReport[]>([]);
+  const [loading, setLoading]       = useState(true);
+  const [expanded, setExpanded]     = useState<Set<number>>(new Set());
   const [publishing, setPublishing] = useState<number | null>(null);
-  const [tab, setTab]             = useState<Tab>('submitted');
+  const [tab, setTab]               = useState<Tab>('submitted');
+
+  // Auto-approve: persisted in localStorage
+  const [autoApprove, setAutoApprove] = useState(
+    () => localStorage.getItem('sec_auto_approve') === 'true'
+  );
+  const autoApproveRef = useRef(autoApprove);
+  useEffect(() => { autoApproveRef.current = autoApprove; }, [autoApprove]);
+
+  function toggleAutoApprove() {
+    setAutoApprove(prev => {
+      const next = !prev;
+      localStorage.setItem('sec_auto_approve', String(next));
+      return next;
+    });
+  }
+
+  // Year export
+  const [exportingYear, setExportingYear] = useState(false);
+
+  async function handleExportYear() {
+    setExportingYear(true);
+    try {
+      const year = new Date().getFullYear();
+      const all = await getConsolidated({});
+      const yearPublished = all
+        .filter(r => r.week.startsWith(String(year)) && r.status === 'published')
+        .sort((a, b) => a.week.localeCompare(b.week));
+
+      if (yearPublished.length === 0) {
+        alert(`No published reports found for ${year}.`);
+        return;
+      }
+
+      // Group by week, preserving sort order
+      const weekMap = new Map<string, { name: string; data: typeof yearPublished[0]['data'] }[]>();
+      for (const r of yearPublished) {
+        if (!weekMap.has(r.week)) weekMap.set(r.week, []);
+        weekMap.get(r.week)!.push({ name: r.team_name ?? 'Team', data: r.data });
+      }
+
+      await exportYearToWord({
+        year,
+        entries: [...weekMap.entries()].map(([w, teams]) => ({ week: w, teams })),
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setExportingYear(false);
+    }
+  }
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getConsolidated({ week });
+      let data = await getConsolidated({ week });
+
+      if (autoApproveRef.current) {
+        const toPublish = data.filter(r => r.status === 'submitted');
+        await Promise.all(toPublish.map(r =>
+          publishConsolidated(r.team_id, week).catch(console.error)
+        ));
+        if (toPublish.length > 0) {
+          data = data.map(r =>
+            toPublish.some(p => p.team_id === r.team_id)
+              ? { ...r, status: 'published' as const }
+              : r
+          );
+        }
+      }
+
       setReports(data);
-      // Auto-expand all
       setExpanded(new Set(data.map(r => r.team_id)));
     } catch (e) {
       console.error(e);
@@ -68,14 +133,39 @@ export default function SecretaryDashboard() {
           <h1 className="text-2xl font-bold text-gray-800">Department Summary</h1>
           <p className="text-sm text-gray-500 mt-0.5">All teams · SOFTI Weekly Reports</p>
         </div>
-        <WeekSelector week={week} onChange={w => setSearchParams({ week: w })} />
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Auto-approve toggle */}
+          <button
+            onClick={toggleAutoApprove}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-semibold transition ${
+              autoApprove
+                ? 'bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100'
+                : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+            }`}
+            title="When on, submitted reports are automatically published on page load"
+          >
+            <span className={`w-3 h-3 rounded-full flex-shrink-0 ${autoApprove ? 'bg-emerald-500' : 'bg-gray-400'}`} />
+            Auto-approve {autoApprove ? 'On' : 'Off'}
+          </button>
+
+          {/* Year export */}
+          <button
+            onClick={handleExportYear}
+            disabled={exportingYear}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-sm font-semibold text-gray-700 hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {exportingYear ? 'Exporting…' : `↓ Export ${new Date().getFullYear()} Reports`}
+          </button>
+
+          <WeekSelector week={week} onChange={w => setSearchParams({ week: w })} />
+        </div>
       </div>
 
       {/* Stats bar */}
       <div className="grid grid-cols-3 gap-3 mb-5">
         <StatCard label="Teams Submitted" value={submittedReports.length} total={reports.length} color="indigo" />
         <StatCard label="Teams Published" value={publishedReports.length} total={reports.length} color="emerald" />
-        <StatCard label="Pending Review" value={submittedReports.length} color="amber" />
+        <StatCard label="Pending Review"  value={submittedReports.length} color="amber" />
       </div>
 
       {/* Tabs + Publish All */}
@@ -130,7 +220,6 @@ export default function SecretaryDashboard() {
         </div>
       )}
 
-      {/* All reports not yet submitted */}
       {!loading && reports.length === 0 && (
         <div className="text-center py-12 text-gray-400 bg-white border border-gray-200 rounded-xl">
           <p className="text-lg mb-1">No reports for this week</p>
@@ -186,7 +275,6 @@ function TeamReportCard({
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-      {/* Card header */}
       <div
         className="flex items-center justify-between px-5 py-3 cursor-pointer hover:bg-gray-50 transition"
         onClick={onToggle}
@@ -218,7 +306,6 @@ function TeamReportCard({
         </div>
       </div>
 
-      {/* SOFTI content */}
       {isExpanded && (
         <div className="px-5 pb-5 pt-2 border-t border-gray-100">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">

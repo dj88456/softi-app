@@ -3,6 +3,7 @@ import {
   Packer,
   Paragraph,
   TextRun,
+  PageBreak,
   AlignmentType,
   UnderlineType,
   convertInchesToTwip,
@@ -20,8 +21,12 @@ const SECTION_META = {
 type SectionKey = keyof typeof SECTION_META;
 const SECTIONS: SectionKey[] = ['successes', 'opportunities', 'failures', 'threats', 'issues'];
 
-// Strip any typed bullet prefix so we don't double-up with Word's native bullet
 const BULLET_PREFIX_RE = /^[•○–→✓⚠] /;
+
+const PT         = 20;
+const SIZE_BODY  = 24; // 12pt
+const SIZE_HEAD  = 28; // 14pt — section heading
+const SIZE_NA    = 20; // 10pt
 
 /** Format ISO week as "April 6 to April 10, 2026" (Monday–Friday workdays) */
 function weekToDateRange(week: string): string {
@@ -36,31 +41,21 @@ function weekToDateRange(week: string): string {
   return `${fmt(monday)} to ${fmt(friday)}, ${friday.getFullYear()}`;
 }
 
-/** Strip **bold** and _italic_ markers from a string */
 function stripMarkers(text: string): string {
   return text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/_(.*?)_/g, '$1');
 }
 
-/** Parse inline **bold** and _italic_ into TextRun children */
 function parseInline(text: string, size: number): TextRun[] {
   const runs: TextRun[] = [];
   let i = 0;
   while (i < text.length) {
     if (text[i] === '*' && text[i + 1] === '*') {
       const end = text.indexOf('**', i + 2);
-      if (end !== -1) {
-        runs.push(new TextRun({ text: text.slice(i + 2, end), bold: true, size }));
-        i = end + 2;
-        continue;
-      }
+      if (end !== -1) { runs.push(new TextRun({ text: text.slice(i + 2, end), bold: true, size })); i = end + 2; continue; }
     }
     if (text[i] === '_') {
       const end = text.indexOf('_', i + 1);
-      if (end !== -1) {
-        runs.push(new TextRun({ text: text.slice(i + 1, end), italics: true, size }));
-        i = end + 1;
-        continue;
-      }
+      if (end !== -1) { runs.push(new TextRun({ text: text.slice(i + 1, end), italics: true, size })); i = end + 1; continue; }
     }
     let j = i + 1;
     while (j < text.length && text[j] !== '*' && text[j] !== '_') j++;
@@ -70,122 +65,60 @@ function parseInline(text: string, size: number): TextRun[] {
   return runs;
 }
 
-export async function exportToWord(params: {
-  week: string;
-  memberName: string;
-  teamName: string;
-  data: SOFTIData;
-  isGroup?: boolean;
-}): Promise<void> {
-  const { week, memberName, teamName, data, isGroup } = params;
-  const dateRange = weekToDateRange(week);
+const blank = () => new Paragraph({ spacing: { before: 0, after: 0 }, children: [] });
 
-  const PT = 20; // 1pt = 20 twips
+function isNAItem(s: string): boolean {
+  const norm = s.trim().toLowerCase().replace(/[\s/]/g, '');
+  return norm === 'na' || norm === 'none' || norm === 'nil';
+}
 
-  const SIZE_BODY    = 24; // 12pt  — Calibri (Body)
-  const SIZE_SECTION = 28; // 14pt  — Arial
-  const SIZE_NA      = 20; // 10pt  — Arial
-  const SIZE_META    = 22; // 11pt
-
-  const blank = () => new Paragraph({ spacing: { before: 0, after: 0 }, children: [] });
-
-  const children: Paragraph[] = [];
-
-  // ── Document header ──────────────────────────────────────────────────────────
-  children.push(
-    new Paragraph({
-      spacing: { after: 16 * PT },
-      children: [
-        new TextRun({ text: `${isGroup ? 'EA ' : ''}SOFTI - ${dateRange}`, bold: true, size: SIZE_BODY + 4, color: '111827' }),
-      ],
-    }),
-  );
-
-  // ── SOFTI Sections ───────────────────────────────────────────────────────────
+/** Build the SOFTI section paragraphs for one report's data */
+function buildSOFTIParagraphs(data: SOFTIData): Paragraph[] {
+  const out: Paragraph[] = [];
   for (const key of SECTIONS) {
     const meta = SECTION_META[key];
     const items = data[key] ?? [];
 
-    // Section heading — bold underlined 18pt
-    children.push(
-      new Paragraph({
-        alignment: AlignmentType.LEFT,
-        spacing: { before: 14 * PT, after: 4 * PT },
-        children: [
-          new TextRun({
-            text: meta.label,
-            bold: true,
-            font: 'Arial',
-            size: SIZE_SECTION,
-            underline: { type: UnderlineType.SINGLE, color: '111827' },
-            color: '111827',
-          }),
-        ],
-      }),
-    );
+    out.push(new Paragraph({
+      alignment: AlignmentType.LEFT,
+      spacing: { before: 14 * PT, after: 4 * PT },
+      children: [new TextRun({
+        text: meta.label, bold: true, font: 'Arial', size: SIZE_HEAD,
+        underline: { type: UnderlineType.SINGLE, color: '111827' }, color: '111827',
+      })],
+    }));
 
-    const isNAItem = (s: string) => {
-      const norm = s.trim().toLowerCase().replace(/[\s/]/g, '');
-      return norm === 'na' || norm === 'none' || norm === 'nil';
-    };
     const allNA = items.length > 0 && items.every(isNAItem);
-
     if (items.length === 0 || allNA) {
-      children.push(
-        new Paragraph({
-          spacing: { before: 0, after: 0 },
-          children: [new TextRun({ text: 'n/a', font: 'Arial', size: SIZE_NA, color: '111827' })],
-        }),
-      );
-      children.push(blank());
+      out.push(new Paragraph({ spacing: { before: 0, after: 0 }, children: [new TextRun({ text: 'n/a', font: 'Arial', size: SIZE_NA, color: '111827' })] }));
+      out.push(blank());
       continue;
     }
 
-    // Blank line before first item
-    children.push(blank());
-
+    out.push(blank());
     for (let idx = 0; idx < items.length; idx++) {
       const lines = items[idx].split('\n').filter(l => l.trim() !== '');
       if (lines.length === 0) continue;
-
-      // First line: always bold, strip any typed bullet/marker prefix
-      children.push(
-        new Paragraph({
-          spacing: { before: 0, after: 0 },
-          children: [
-            new TextRun({
-              text: stripMarkers(lines[0].replace(BULLET_PREFIX_RE, '')),
-              bold: true,
-              size: SIZE_BODY,
-              color: '111827',
-            }),
-          ],
-        }),
-      );
-
-      // Remaining lines: Word native bullet, strip typed prefix if present
+      out.push(new Paragraph({
+        spacing: { before: 0, after: 0 },
+        children: [new TextRun({ text: stripMarkers(lines[0].replace(BULLET_PREFIX_RE, '')), bold: true, size: SIZE_BODY, color: '111827' })],
+      }));
       for (const line of lines.slice(1)) {
-        children.push(
-          new Paragraph({
-            bullet: { level: 0 },
-            spacing: { before: 0, after: 0 },
-            children: parseInline(line.replace(BULLET_PREFIX_RE, ''), SIZE_BODY),
-          }),
-        );
+        out.push(new Paragraph({
+          bullet: { level: 0 },
+          spacing: { before: 0, after: 0 },
+          children: parseInline(line.replace(BULLET_PREFIX_RE, ''), SIZE_BODY),
+        }));
       }
-
-      // Single blank line between items (not after the last one)
-      if (idx < items.length - 1) {
-        children.push(blank());
-      }
+      if (idx < items.length - 1) out.push(blank());
     }
-
-    // Blank line after last item
-    children.push(blank());
+    out.push(blank());
   }
+  return out;
+}
 
-  // ── Build & download ─────────────────────────────────────────────────────────
-  const doc = new Document({
+function buildDocument(children: Paragraph[]): Document {
+  return new Document({
     styles: {
       default: {
         document: {
@@ -194,28 +127,81 @@ export async function exportToWord(params: {
         },
       },
     },
-    sections: [
-      {
-        properties: {
-          page: {
-            margin: {
-              top:    convertInchesToTwip(1),
-              bottom: convertInchesToTwip(1),
-              left:   convertInchesToTwip(1.25),
-              right:  convertInchesToTwip(1.25),
-            },
+    sections: [{
+      properties: {
+        page: {
+          margin: {
+            top:    convertInchesToTwip(1),
+            bottom: convertInchesToTwip(1),
+            left:   convertInchesToTwip(1.25),
+            right:  convertInchesToTwip(1.25),
           },
         },
-        children,
       },
-    ],
+      children,
+    }],
   });
+}
 
-  const blob = await Packer.toBlob(doc);
+function triggerDownload(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `SOFTI_${memberName.replace(/\s+/g, '_')}_${week}.docx`;
+  a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+// ── Single-week export ────────────────────────────────────────────────────────
+
+export async function exportToWord(params: {
+  week: string;
+  memberName: string;
+  teamName: string;
+  data: SOFTIData;
+  isGroup?: boolean;
+}): Promise<void> {
+  const { week, memberName, data, isGroup } = params;
+  const children: Paragraph[] = [
+    new Paragraph({
+      spacing: { after: 16 * PT },
+      children: [new TextRun({ text: `${isGroup ? 'EA ' : ''}SOFTI - ${weekToDateRange(week)}`, bold: true, size: SIZE_BODY + 4, color: '111827' })],
+    }),
+    ...buildSOFTIParagraphs(data),
+  ];
+  const blob = await Packer.toBlob(buildDocument(children));
+  triggerDownload(blob, `SOFTI_${memberName.replace(/\s+/g, '_')}_${week}.docx`);
+}
+
+// ── Full-year export (secretary) ──────────────────────────────────────────────
+
+export async function exportYearToWord(params: {
+  year: number;
+  entries: { week: string; teams: { name: string; data: SOFTIData }[] }[];
+}): Promise<void> {
+  const { year, entries } = params;
+  const children: Paragraph[] = [];
+
+  entries.forEach(({ week, teams }, i) => {
+    if (i > 0) children.push(new Paragraph({ children: [new PageBreak()] }));
+
+    // Week header
+    children.push(new Paragraph({
+      spacing: { after: 16 * PT },
+      children: [new TextRun({ text: `EA SOFTI - ${weekToDateRange(week)}`, bold: true, size: SIZE_BODY + 4, color: '111827' })],
+    }));
+
+    teams.forEach(({ name, data }) => {
+      if (teams.length > 1) {
+        children.push(new Paragraph({
+          spacing: { before: 12 * PT, after: 4 * PT },
+          children: [new TextRun({ text: name, bold: true, size: SIZE_BODY + 2, color: '374151' })],
+        }));
+      }
+      children.push(...buildSOFTIParagraphs(data));
+    });
+  });
+
+  const blob = await Packer.toBlob(buildDocument(children));
+  triggerDownload(blob, `EA_SOFTI_${year}_Annual.docx`);
 }
