@@ -608,6 +608,13 @@ export default function TeamConsolidation() {
               <button onClick={() => setHistoryFilter('all')} className={`px-3 py-1 rounded-md text-xs font-semibold transition ${historyFilter === 'all' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>All</button>
               <button onClick={() => setHistoryFilter('draft')} className={`px-3 py-1 rounded-md text-xs font-semibold transition ${historyFilter === 'draft' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>Drafts only</button>
             </div>
+            <button
+              onClick={handleExportYear}
+              disabled={exportingYear}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-sm font-semibold text-gray-700 hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {exportingYear ? 'Exporting…' : `↓ Export ${new Date().getFullYear()} Reports`}
+            </button>
           </div>
           {historyLoading ? (
             <div className="text-center py-12 text-gray-400">Loading…</div>
@@ -839,13 +846,6 @@ export default function TeamConsolidation() {
 
               {/* Action Buttons */}
               <div className="flex gap-3 mt-4 justify-end border-t border-gray-100 pt-4 flex-wrap">
-                <button
-                  onClick={handleExportYear}
-                  disabled={exportingYear}
-                  className="px-5 py-2 rounded-lg border-2 border-gray-300 text-gray-700 hover:bg-gray-100 text-sm font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  {exportingYear ? 'Exporting…' : `↓ Export ${new Date().getFullYear()} Reports`}
-                </button>
                 <button
                   onClick={handleExport}
                   disabled={exporting || SECTIONS.every(s => consolidated[s].length === 0)}
