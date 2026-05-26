@@ -350,7 +350,7 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
           onClick={add}
           disabled={!draft.trim()}
           className={`px-4 py-2 rounded-lg text-base font-semibold transition flex-shrink-0 ${
-            draft.trim() ? `${meta.badge} text-white opacity-70 hover:opacity-90` : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            draft.trim() ? `${meta.badge} text-white opacity-50 hover:opacity-80` : 'bg-gray-200 text-gray-400 cursor-not-allowed'
           }`}
         >
           + Add
@@ -359,7 +359,7 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
       ) : (
         <button
           onClick={openInput}
-          className={`mt-1 px-3 py-1.5 rounded-lg text-sm font-semibold ${meta.badge} text-white opacity-70 hover:opacity-90 transition`}
+          className={`mt-1 px-3 py-1.5 rounded-lg text-sm font-semibold ${meta.badge} text-white opacity-50 hover:opacity-80 transition`}
         >
           + Add
         </button>
