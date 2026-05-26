@@ -217,9 +217,7 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
   const [dragOver, setDragOver] = useState<number | null>(null);
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
 
-  // Successes always shows the input; other sections toggle it via "+ Add"
-  const alwaysOpen = section === 'successes';
-  const [inputOpen, setInputOpen] = useState(alwaysOpen);
+  const [inputOpen, setInputOpen] = useState(false);
 
   function openInput() {
     setInputOpen(true);
@@ -229,16 +227,13 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
   function add() {
     const trimmed = draft.trim();
     if (!trimmed) {
-      if (!alwaysOpen) setInputOpen(false);
+      setInputOpen(false);
       return;
     }
     onChange([...items, trimmed]);
     setDraft('');
-    if (alwaysOpen) {
-      setTimeout(() => addRef.current?.focus(), 0);
-    } else {
-      setInputOpen(false);
-    }
+    // keep open for rapid multi-entry; closes on next empty blur
+    setTimeout(() => addRef.current?.focus(), 0);
   }
 
   function remove(i: number) { onChange(items.filter((_, idx) => idx !== i)); }
@@ -324,35 +319,28 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
 
       {/* Add new item */}
       {inputOpen ? (
-      <div className="flex gap-2 items-start">
-        <span className={`mt-1.5 w-5 h-5 rounded-full flex-shrink-0 ${meta.badge} text-white text-xs font-bold flex items-center justify-center opacity-40`}>
-          {items.length + 1}
-        </span>
-        <RichTextInput
-          value={draft}
-          onChange={setDraft}
-          onKeyDown={handleAddKeyDown}
-          onBlur={add}
-          textareaRef={addRef}
-          className="flex-1"
-        />
-        <button
-          onClick={add}
-          disabled={!draft.trim()}
-          className={`px-4 py-2 rounded-lg text-base font-semibold transition flex-shrink-0 ${
-            draft.trim() ? `${meta.badge} text-white opacity-50 hover:opacity-80` : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          + Add
-        </button>
-      </div>
+        <div className="flex gap-2 items-start">
+          <span className={`mt-1.5 w-5 h-5 rounded-full flex-shrink-0 ${meta.badge} text-white text-xs font-bold flex items-center justify-center opacity-40`}>
+            {items.length + 1}
+          </span>
+          <RichTextInput
+            value={draft}
+            onChange={setDraft}
+            onKeyDown={handleAddKeyDown}
+            onBlur={add}
+            textareaRef={addRef}
+            className="flex-1"
+          />
+        </div>
       ) : (
-        <button
+        <div
           onClick={openInput}
-          className={`mt-1 px-3 py-1.5 rounded-lg text-sm font-semibold ${meta.badge} text-white opacity-50 hover:opacity-80 transition`}
+          className="cursor-text min-h-[2rem] flex items-center"
         >
-          + Add
-        </button>
+          {items.length === 0 && (
+            <span className="text-sm text-gray-400 italic select-none">n/a</span>
+          )}
+        </div>
       )}
     </div>
   );
