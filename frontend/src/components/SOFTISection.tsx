@@ -173,6 +173,14 @@ interface ReadOnlyProps {
 
 export function SOFTISectionReadOnly({ section, items, onCopy, highlight }: ReadOnlyProps) {
   const meta = SECTION_META[section];
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
+
+  function handleCopy(item: string, i: number) {
+    onCopy!(item);
+    setCopiedIdx(i);
+    setTimeout(() => setCopiedIdx(null), 1200);
+  }
+
   return (
     <div className={`rounded-xl border ${meta.border} ${meta.bg} p-4 mb-2`}>
       <div className={`flex items-center gap-2 mb-3 font-bold text-base ${meta.color}`}>
@@ -194,11 +202,13 @@ export function SOFTISectionReadOnly({ section, items, onCopy, highlight }: Read
               </span>
               {onCopy && (
                 <button
-                  onClick={() => onCopy(item)}
-                  className="opacity-0 group-hover:opacity-100 text-indigo-500 hover:text-indigo-700 text-sm font-bold transition ml-1"
+                  onClick={() => handleCopy(item, i)}
+                  className={`opacity-0 group-hover:opacity-100 text-sm font-bold transition ml-1 ${
+                    copiedIdx === i ? 'text-emerald-500' : 'text-indigo-500 hover:text-indigo-700'
+                  }`}
                   title="Copy to consolidated"
                 >
-                  + Add
+                  {copiedIdx === i ? '✓' : '+ Add'}
                 </button>
               )}
             </li>
