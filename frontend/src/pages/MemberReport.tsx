@@ -221,6 +221,8 @@ export default function MemberReport() {
             History
           </button>
 
+          <div className="flex-1" />
+
           <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
             isSubmitted ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
           }`}>
@@ -236,21 +238,21 @@ export default function MemberReport() {
 
           <div className="flex-1" />
 
-          <button
-            onClick={handleCopyLastWeek}
-            disabled={copyingLastWeek || loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition disabled:opacity-40 disabled:cursor-not-allowed"
-            title={`Copy content from ${prevWeek(week)}`}
-          >
-            {copyingLastWeek ? 'Copying…' : `↑ Copy last week (${prevWeek(week)})`}
-          </button>
           <input
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search…"
-            className="h-9 px-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-36 transition"
+            className="h-8 px-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-32 transition"
           />
+          <button
+            onClick={handleCopyLastWeek}
+            disabled={copyingLastWeek || loading}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-gray-300 text-xs font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-400 transition disabled:opacity-40 disabled:cursor-not-allowed"
+            title={`Copy content from ${prevWeek(week)}`}
+          >
+            {copyingLastWeek ? 'Copying…' : `↑ ${prevWeek(week)}`}
+          </button>
           <WeekSelector week={week} onChange={w => setSearchParams({ week: w })} />
         </div>
 
