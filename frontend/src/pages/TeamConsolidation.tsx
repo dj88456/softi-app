@@ -694,7 +694,7 @@ export default function TeamConsolidation() {
                   <div className="relative">
                     <button
                       onClick={() => setShowMemberPicker(v => !v)}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition"
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition"
                       title="Enter report for any member"
                     >
                       + Enter Report
@@ -749,14 +749,14 @@ export default function TeamConsolidation() {
                         <div className="mr-2 flex items-center gap-1 flex-shrink-0">
                           <button
                             onClick={e => { e.stopPropagation(); openPasteModal(report.member_id, report.member_name ?? ''); }}
-                            className="px-2 py-1 rounded text-xs font-semibold bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition"
+                            className="px-2.5 py-1.5 rounded text-xs font-semibold bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition"
                             title="Paste & auto-classify report for this member"
                           >
                             ✎ Enter
                           </button>
                           <button
                             onClick={e => { e.stopPropagation(); handleDeleteReport(report.member_id, report.member_name ?? ''); }}
-                            className="px-2 py-1 rounded text-xs font-semibold bg-red-100 text-red-600 hover:bg-red-200 transition"
+                            className="px-2.5 py-1.5 rounded text-xs font-semibold bg-red-100 text-red-600 hover:bg-red-200 transition"
                             title="Delete this member's report"
                           >
                             ✕
@@ -794,7 +794,7 @@ export default function TeamConsolidation() {
                   {memberReports.length > 0 && (
                     <button
                       onClick={importAllReports}
-                      className="flex items-center gap-1 px-3 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-xs font-semibold transition"
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-xs font-semibold transition"
                       title="Import all member reports into consolidated (skips duplicates)"
                     >
                       ↙ Import All
