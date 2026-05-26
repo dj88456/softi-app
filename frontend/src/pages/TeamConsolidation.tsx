@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useUser } from '../App';
@@ -201,6 +201,7 @@ export default function TeamConsolidation() {
   // Per-member inline editing
   const [memberEdits, setMemberEdits]           = useState<Record<number, SOFTIData>>({});
   const [memberSaveStates, setMemberSaveStates] = useState<Record<number, SaveState>>({});
+  const memberAutoSaveTimers = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
   const [similarPairs, setSimilarPairs] = useState<SimilarPair[]>([]);
   const [showSimilarModal, setShowSimilarModal] = useState(false);
 
@@ -314,28 +315,32 @@ export default function TeamConsolidation() {
   }
 
   function setMemberSection(memberId: number, baseData: SOFTIData, section: SectionKey, items: string[]) {
-    setMemberEdits(prev => ({
-      ...prev,
-      [memberId]: { ...(prev[memberId] ?? baseData), [section]: items },
-    }));
+    const newData = { ...(memberEdits[memberId] ?? baseData), [section]: items };
+    setMemberEdits(prev => ({ ...prev, [memberId]: newData }));
     setMemberSaveStates(prev => ({ ...prev, [memberId]: 'idle' }));
+    if (memberAutoSaveTimers.current[memberId]) clearTimeout(memberAutoSaveTimers.current[memberId]);
+    memberAutoSaveTimers.current[memberId] = setTimeout(() => {
+      const report = memberReports.find(r => r.member_id === memberId);
+      if (report) saveMemberReportData(memberId, report, newData);
+    }, 1500);
+  }
+
+  async function saveMemberReportData(memberId: number, report: WeeklyReport, data: SOFTIData) {
+    if (!user?.team_id) return;
+    setMemberSaveStates(prev => ({ ...prev, [memberId]: 'saving' }));
+    try {
+      await saveReport({ member_id: memberId, team_id: user.team_id, week, data, status: report.status as 'draft' | 'submitted' });
+      setMemberReports(prev => prev.map(r => r.member_id === memberId ? { ...r, data } : r));
+      setMemberEdits(prev => { const n = { ...prev }; delete n[memberId]; return n; });
+      setMemberSaveStates(prev => ({ ...prev, [memberId]: 'saved' }));
+      setTimeout(() => setMemberSaveStates(prev => ({ ...prev, [memberId]: 'idle' })), 2000);
+    } catch {
+      setMemberSaveStates(prev => ({ ...prev, [memberId]: 'error' }));
+    }
   }
 
   async function saveMemberReport(report: WeeklyReport, status: 'draft' | 'submitted') {
-    if (!user?.team_id) return;
-    const data = getMemberData(report);
-    setMemberSaveStates(prev => ({ ...prev, [report.member_id]: 'saving' }));
-    try {
-      await saveReport({ member_id: report.member_id, team_id: user.team_id, week, data, status });
-      setMemberReports(prev => prev.map(r =>
-        r.member_id === report.member_id ? { ...r, data, status } : r
-      ));
-      setMemberEdits(prev => { const n = { ...prev }; delete n[report.member_id]; return n; });
-      setMemberSaveStates(prev => ({ ...prev, [report.member_id]: 'saved' }));
-      setTimeout(() => setMemberSaveStates(prev => ({ ...prev, [report.member_id]: 'idle' })), 2000);
-    } catch {
-      setMemberSaveStates(prev => ({ ...prev, [report.member_id]: 'error' }));
-    }
+    await saveMemberReportData(report.member_id, { ...report, status }, getMemberData(report));
   }
 
   function handleParse() { setParsed(parseSOFTI(pasteText)); }
@@ -814,25 +819,13 @@ export default function TeamConsolidation() {
                                 highlight={search}
                               />
                             ))}
-                            <div className="flex items-center justify-end gap-2 mt-3">
-                              {mSave === 'saving' && <span className="text-xs text-gray-400">Saving…</span>}
-                              {mSave === 'saved'  && <span className="text-xs text-emerald-600 font-semibold">✓ Saved</span>}
-                              {mSave === 'error'  && <span className="text-xs text-red-600 font-semibold">✗ Error</span>}
-                              <button
-                                onClick={() => saveMemberReport(report, 'draft')}
-                                disabled={mSave === 'saving' || !isDirty}
-                                className="px-4 py-1.5 rounded-lg border border-gray-300 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
-                              >
-                                Save Draft
-                              </button>
-                              <button
-                                onClick={() => saveMemberReport(report, 'submitted')}
-                                disabled={mSave === 'saving'}
-                                className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed"
-                              >
-                                {report.status === 'submitted' && !isDirty ? '✓ Submitted' : 'Submit'}
-                              </button>
-                            </div>
+                            {(mSave === 'saving' || mSave === 'saved' || mSave === 'error') && (
+                              <div className="flex justify-end mt-2">
+                                {mSave === 'saving' && <span className="text-xs text-gray-400">Saving…</span>}
+                                {mSave === 'saved'  && <span className="text-xs text-emerald-600 font-semibold">✓ Saved</span>}
+                                {mSave === 'error'  && <span className="text-xs text-red-600 font-semibold">✗ Error</span>}
+                              </div>
+                            )}
                           </div>
                         );
                       })()}
