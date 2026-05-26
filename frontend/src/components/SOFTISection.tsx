@@ -335,10 +335,14 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
       ) : (
         <div
           onClick={openInput}
-          className="cursor-text min-h-[2rem] flex items-center"
+          className="cursor-text min-h-[2rem] flex items-center group/add"
         >
-          {items.length === 0 && (
+          {items.length === 0 ? (
             <span className="text-sm text-gray-400 italic select-none">n/a</span>
+          ) : (
+            <span className="text-xs text-gray-300 group-hover/add:text-gray-400 select-none transition">
+              + add
+            </span>
           )}
         </div>
       )}
