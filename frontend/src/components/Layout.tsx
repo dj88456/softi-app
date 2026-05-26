@@ -56,7 +56,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold transition"
+                  className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold transition"
                 >
                   Sign Out
                 </button>
@@ -65,7 +65,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               location.pathname === '/view' && (
                 <button
                   onClick={() => navigate('/')}
-                  className="px-4 py-2 rounded-lg bg-white text-indigo-700 text-sm font-bold hover:bg-indigo-50 transition shadow-sm"
+                  className="px-4 py-1.5 rounded-lg bg-white text-indigo-700 text-sm font-bold hover:bg-indigo-50 transition shadow-sm"
                 >
                   Exit
                 </button>
@@ -92,7 +92,7 @@ function NavLink({ to, active, children }: { to: string; active: boolean; childr
   return (
     <Link
       to={to}
-      className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
+      className={`px-3.5 py-1.5 rounded-lg font-semibold text-sm transition ${
         active
           ? 'bg-white text-indigo-700'
           : 'text-indigo-100 hover:bg-indigo-600 hover:text-white'

@@ -101,7 +101,7 @@ export default function SecretaryDashboard() {
           {/* Auto-approve toggle */}
           <button
             onClick={toggleAutoApprove}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-semibold transition ${
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-semibold transition ${
               autoApprove
                 ? 'bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100'
                 : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
@@ -137,7 +137,7 @@ export default function SecretaryDashboard() {
           <button
             onClick={handlePublishAll}
             disabled={publishing !== null}
-            className="px-5 py-2.5 bg-indigo-700 hover:bg-indigo-600 text-white text-sm font-semibold rounded-lg transition disabled:opacity-50"
+            className="px-4 py-2 bg-indigo-700 hover:bg-indigo-600 text-white text-sm font-semibold rounded-lg transition disabled:opacity-50"
           >
             Publish All ({submittedReports.length})
           </button>
@@ -252,7 +252,7 @@ function TeamReportCard({
             <button
               onClick={e => { e.stopPropagation(); onPublish(); }}
               disabled={publishing}
-              className="text-sm px-4 py-2 rounded-lg bg-indigo-700 hover:bg-indigo-600 text-white font-medium transition disabled:opacity-50"
+              className="text-xs px-3 py-1.5 rounded-lg bg-indigo-700 hover:bg-indigo-600 text-white font-medium transition disabled:opacity-50"
             >
               {publishing ? 'Publishing…' : 'Publish'}
             </button>
