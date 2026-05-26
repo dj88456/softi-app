@@ -794,7 +794,7 @@ export default function TeamConsolidation() {
                   {memberReports.length > 0 && (
                     <button
                       onClick={importAllReports}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-xs font-semibold transition"
+                      className="flex items-center gap-1 px-3 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-xs font-semibold transition"
                       title="Import all member reports into consolidated (skips duplicates)"
                     >
                       ↙ Import All
@@ -802,10 +802,10 @@ export default function TeamConsolidation() {
                   )}
                   <button
                     onClick={() => setShowClearConfirm(true)}
-                    className="flex items-center gap-1 px-1.5 py-0.5 rounded border border-red-200 text-red-500 text-xs transition hover:bg-red-50"
+                    className="flex items-center px-1.5 py-1 rounded border border-red-200 text-red-500 text-xs transition hover:bg-red-50"
                     title="Clear all consolidated content"
                   >
-                    ✕ Clear
+                    ✕
                   </button>
                   {droppedItems.length > 0 && !showDropped && (
                     <button
