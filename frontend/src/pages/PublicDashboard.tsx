@@ -118,7 +118,7 @@ export default function PublicDashboard() {
     setLoading(true);
     try {
       const data = await getConsolidated({ week });
-      setReports(data.filter(r => r.status === 'published'));
+      setReports(data.filter(r => r.status === 'published' || r.status === 'submitted'));
     } catch (e) {
       console.error(e);
     } finally {
