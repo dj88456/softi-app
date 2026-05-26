@@ -167,20 +167,11 @@ function RichTextInput({
 interface ReadOnlyProps {
   section: SectionKey;
   items: string[];
-  onCopy?: (item: string) => void;
   highlight?: string;
 }
 
-export function SOFTISectionReadOnly({ section, items, onCopy, highlight }: ReadOnlyProps) {
+export function SOFTISectionReadOnly({ section, items, highlight }: ReadOnlyProps) {
   const meta = SECTION_META[section];
-  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
-
-  function handleCopy(item: string, i: number) {
-    onCopy!(item);
-    setCopiedIdx(i);
-    setTimeout(() => setCopiedIdx(null), 1200);
-  }
-
   return (
     <div className={`rounded-xl border ${meta.border} ${meta.bg} p-4 mb-2`}>
       <div className={`flex items-center gap-2 mb-3 font-bold text-base ${meta.color}`}>
@@ -193,24 +184,13 @@ export function SOFTISectionReadOnly({ section, items, onCopy, highlight }: Read
       ) : (
         <ul className="space-y-3">
           {items.map((item, i) => (
-            <li key={i} className="flex items-start gap-2 text-base text-gray-700 group">
+            <li key={i} className="flex items-start gap-2 text-base text-gray-700">
               <span className={`mt-0.5 w-5 h-5 rounded-full flex-shrink-0 ${meta.badge} text-white text-xs font-bold flex items-center justify-center opacity-60`}>
                 {i + 1}
               </span>
               <span className="flex-1 font-medium">
                 <RenderText text={item} highlight={highlight} />
               </span>
-              {onCopy && (
-                <button
-                  onClick={() => handleCopy(item, i)}
-                  className={`opacity-0 group-hover:opacity-100 text-sm font-bold transition ml-1 ${
-                    copiedIdx === i ? 'text-emerald-500' : 'text-indigo-500 hover:text-indigo-700'
-                  }`}
-                  title="Copy to consolidated"
-                >
-                  {copiedIdx === i ? '✓' : '+ Add'}
-                </button>
-              )}
             </li>
           ))}
         </ul>
