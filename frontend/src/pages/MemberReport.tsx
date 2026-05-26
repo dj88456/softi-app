@@ -243,7 +243,7 @@ export default function MemberReport() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search…"
-            className="h-9 px-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-40 transition"
+            className="h-9 px-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-80 transition"
           />
           <button
             onClick={handleCopyLastWeek}
