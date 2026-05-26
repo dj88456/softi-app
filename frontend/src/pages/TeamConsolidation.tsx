@@ -33,7 +33,7 @@ interface DroppedItem {
 
 const DROPPED_REASON_LABEL: Record<DroppedItem['reason'], string> = {
   learnings:      'Learnings (skipped)',
-  na_replaced:    'N/A (removed — section has real content)',
+  na_replaced:    'N/A skipped — other members have real content here',
   duplicate:      'Duplicate (already imported from another member)',
   doc_merged:     'Merged into Documents Reviewed / Approved summary',
   similar_merged: 'Merged with similar item',
