@@ -340,8 +340,8 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
           {items.length === 0 ? (
             <span className="text-sm text-gray-400 italic select-none">n/a</span>
           ) : (
-            <span className="text-sm text-gray-300 group-hover/add:text-gray-400 select-none transition">
-              + add
+            <span className="text-base text-gray-300 group-hover/add:text-gray-400 select-none transition leading-none">
+              ＋
             </span>
           )}
         </div>
