@@ -756,7 +756,7 @@ export default function TeamConsolidation() {
                           </button>
                           <button
                             onClick={e => { e.stopPropagation(); handleDeleteReport(report.member_id, report.member_name ?? ''); }}
-                            className="px-2.5 py-1.5 rounded text-xs font-semibold bg-red-100 text-red-600 hover:bg-red-200 transition"
+                            className="px-3 py-2 rounded text-sm font-semibold bg-red-100 text-red-600 hover:bg-red-200 transition"
                             title="Delete this member's report"
                           >
                             ✕
@@ -794,7 +794,7 @@ export default function TeamConsolidation() {
                   {memberReports.length > 0 && (
                     <button
                       onClick={importAllReports}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-xs font-semibold transition"
+                      className="flex items-center gap-1 px-4 py-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-sm font-semibold transition"
                       title="Import all member reports into consolidated (skips duplicates)"
                     >
                       ↙ Import All
