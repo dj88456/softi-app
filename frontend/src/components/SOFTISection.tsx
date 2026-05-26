@@ -186,7 +186,7 @@ export function SOFTISectionReadOnly({ section, items, onCopy, highlight }: Read
         <ul className="space-y-3">
           {items.map((item, i) => (
             <li key={i} className="flex items-start gap-2 text-base text-gray-700 group">
-              <span className={`mt-0.5 w-5 h-5 rounded-full flex-shrink-0 ${meta.badge} text-white text-xs font-bold flex items-center justify-center`}>
+              <span className={`mt-0.5 w-5 h-5 rounded-full flex-shrink-0 ${meta.badge} text-white text-xs font-bold flex items-center justify-center opacity-60`}>
                 {i + 1}
               </span>
               <span className="flex-1 font-medium">
@@ -302,7 +302,7 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
                 ⠿
               </div>
             )}
-            <span className={`mt-2.5 w-5 h-5 rounded-full flex-shrink-0 ${meta.badge} text-white text-xs font-bold flex items-center justify-center`}>
+            <span className={`mt-2.5 w-5 h-5 rounded-full flex-shrink-0 ${meta.badge} text-white text-xs font-bold flex items-center justify-center opacity-60`}>
               {i + 1}
             </span>
             {editingIdx === i ? (
@@ -350,7 +350,7 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
           onClick={add}
           disabled={!draft.trim()}
           className={`px-4 py-2 rounded-lg text-base font-semibold transition flex-shrink-0 ${
-            draft.trim() ? `${meta.badge} text-white hover:opacity-90` : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            draft.trim() ? `${meta.badge} text-white opacity-70 hover:opacity-90` : 'bg-gray-200 text-gray-400 cursor-not-allowed'
           }`}
         >
           + Add
@@ -359,7 +359,7 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
       ) : (
         <button
           onClick={openInput}
-          className={`mt-1 px-3 py-1.5 rounded-lg text-sm font-semibold ${meta.badge} text-white hover:opacity-90 transition`}
+          className={`mt-1 px-3 py-1.5 rounded-lg text-sm font-semibold ${meta.badge} text-white opacity-70 hover:opacity-90 transition`}
         >
           + Add
         </button>
