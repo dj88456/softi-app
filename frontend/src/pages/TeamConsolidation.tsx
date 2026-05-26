@@ -794,7 +794,7 @@ export default function TeamConsolidation() {
                   {memberReports.length > 0 && (
                     <button
                       onClick={importAllReports}
-                      className="flex items-center gap-1 px-4 py-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-sm font-semibold transition"
+                      className="flex items-center gap-1 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition"
                       title="Import all member reports into consolidated (skips duplicates)"
                     >
                       ↙ Import All
