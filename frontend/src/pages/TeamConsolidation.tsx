@@ -756,7 +756,7 @@ export default function TeamConsolidation() {
                           </button>
                           <button
                             onClick={e => { e.stopPropagation(); handleDeleteReport(report.member_id, report.member_name ?? ''); }}
-                            className="px-3 py-2 rounded text-sm font-semibold bg-red-100 text-red-600 hover:bg-red-200 transition"
+                            className="px-2.5 py-1.5 rounded text-xs font-semibold bg-red-100 text-red-600 hover:bg-red-200 transition"
                             title="Delete this member's report"
                           >
                             ✕
@@ -802,7 +802,7 @@ export default function TeamConsolidation() {
                   )}
                   <button
                     onClick={() => setShowClearConfirm(true)}
-                    className="flex items-center px-1.5 py-2 rounded border border-red-200 text-red-500 text-xs transition hover:bg-red-50"
+                    className="flex items-center px-3 py-2 rounded-lg border border-red-200 text-red-500 text-sm transition hover:bg-red-50"
                     title="Clear all consolidated content"
                   >
                     ✕
