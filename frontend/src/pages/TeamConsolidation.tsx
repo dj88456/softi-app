@@ -810,7 +810,7 @@ export default function TeamConsolidation() {
                   {droppedItems.length > 0 && !showDropped && (
                     <button
                       onClick={() => setShowDropped(true)}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-700 text-xs font-semibold transition"
+                      className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-700 text-xs font-semibold transition"
                       title="Review items filtered during import"
                     >
                       ⚠ {droppedItems.length} dropped
