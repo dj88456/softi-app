@@ -786,13 +786,6 @@ export default function TeamConsolidation() {
                         </button>
                         <div className="mr-2 flex items-center gap-1 flex-shrink-0">
                           <button
-                            onClick={e => { e.stopPropagation(); openPasteModal(report.member_id, report.member_name ?? ''); }}
-                            className="px-2.5 py-1.5 rounded text-xs font-semibold bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition"
-                            title="Paste & auto-classify report for this member"
-                          >
-                            ✎ Enter
-                          </button>
-                          <button
                             onClick={e => { e.stopPropagation(); handleDeleteReport(report.member_id, report.member_name ?? ''); }}
                             className="px-2.5 py-1.5 rounded text-xs font-semibold bg-red-100 text-red-600 hover:bg-red-200 transition"
                             title="Delete this member's report"
