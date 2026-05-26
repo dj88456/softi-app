@@ -804,7 +804,7 @@ export default function TeamConsolidation() {
                         const isDirty = !!memberEdits[report.member_id];
                         return (
                           <div className="p-3 bg-white">
-                            {SECTIONS.map(s => (
+                            {SECTIONS.filter(s => mData[s].length > 0).map(s => (
                               <SOFTISectionEditable
                                 key={s}
                                 section={s}
