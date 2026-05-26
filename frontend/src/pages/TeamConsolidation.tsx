@@ -197,6 +197,10 @@ export default function TeamConsolidation() {
   const [loading, setLoading]             = useState(true);
   const [showMemberPicker, setShowMemberPicker] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+
+  // Per-member inline editing
+  const [memberEdits, setMemberEdits]           = useState<Record<number, SOFTIData>>({});
+  const [memberSaveStates, setMemberSaveStates] = useState<Record<number, SaveState>>({});
   const [similarPairs, setSimilarPairs] = useState<SimilarPair[]>([]);
   const [showSimilarModal, setShowSimilarModal] = useState(false);
 
@@ -302,6 +306,35 @@ export default function TeamConsolidation() {
       load();
     } catch (e) {
       console.error(e);
+    }
+  }
+
+  function getMemberData(report: WeeklyReport): SOFTIData {
+    return memberEdits[report.member_id] ?? report.data;
+  }
+
+  function setMemberSection(memberId: number, baseData: SOFTIData, section: SectionKey, items: string[]) {
+    setMemberEdits(prev => ({
+      ...prev,
+      [memberId]: { ...(prev[memberId] ?? baseData), [section]: items },
+    }));
+    setMemberSaveStates(prev => ({ ...prev, [memberId]: 'idle' }));
+  }
+
+  async function saveMemberReport(report: WeeklyReport, status: 'draft' | 'submitted') {
+    if (!user?.team_id) return;
+    const data = getMemberData(report);
+    setMemberSaveStates(prev => ({ ...prev, [report.member_id]: 'saving' }));
+    try {
+      await saveReport({ member_id: report.member_id, team_id: user.team_id, week, data, status });
+      setMemberReports(prev => prev.map(r =>
+        r.member_id === report.member_id ? { ...r, data, status } : r
+      ));
+      setMemberEdits(prev => { const n = { ...prev }; delete n[report.member_id]; return n; });
+      setMemberSaveStates(prev => ({ ...prev, [report.member_id]: 'saved' }));
+      setTimeout(() => setMemberSaveStates(prev => ({ ...prev, [report.member_id]: 'idle' })), 2000);
+    } catch {
+      setMemberSaveStates(prev => ({ ...prev, [report.member_id]: 'error' }));
     }
   }
 
@@ -765,18 +798,44 @@ export default function TeamConsolidation() {
                       </div>
 
                       {/* Member report content */}
-                      {expanded.has(report.member_id) && (
-                        <div className="p-3 bg-white">
-                          {SECTIONS.map(s => (
-                            <SOFTISectionReadOnly
-                              key={s}
-                              section={s}
-                              items={report.data[s]}
-                              highlight={search}
-                            />
-                          ))}
-                        </div>
-                      )}
+                      {expanded.has(report.member_id) && (() => {
+                        const mData = getMemberData(report);
+                        const mSave = memberSaveStates[report.member_id] ?? 'idle';
+                        const isDirty = !!memberEdits[report.member_id];
+                        return (
+                          <div className="p-3 bg-white">
+                            {SECTIONS.map(s => (
+                              <SOFTISectionEditable
+                                key={s}
+                                section={s}
+                                items={mData[s]}
+                                onChange={items => setMemberSection(report.member_id, report.data, s, items)}
+                                canReorder
+                                highlight={search}
+                              />
+                            ))}
+                            <div className="flex items-center justify-end gap-2 mt-3">
+                              {mSave === 'saving' && <span className="text-xs text-gray-400">Saving…</span>}
+                              {mSave === 'saved'  && <span className="text-xs text-emerald-600 font-semibold">✓ Saved</span>}
+                              {mSave === 'error'  && <span className="text-xs text-red-600 font-semibold">✗ Error</span>}
+                              <button
+                                onClick={() => saveMemberReport(report, 'draft')}
+                                disabled={mSave === 'saving' || !isDirty}
+                                className="px-4 py-1.5 rounded-lg border border-gray-300 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                              >
+                                Save Draft
+                              </button>
+                              <button
+                                onClick={() => saveMemberReport(report, 'submitted')}
+                                disabled={mSave === 'saving'}
+                                className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed"
+                              >
+                                {report.status === 'submitted' && !isDirty ? '✓ Submitted' : 'Submit'}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   ))}
                 </div>
