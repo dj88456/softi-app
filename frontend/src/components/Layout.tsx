@@ -26,7 +26,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
           {/* Center: Role-based nav */}
           <nav className="flex items-center gap-1">
-            {user?.role === 'member' && (
+            {(user?.role === 'member' || user?.role === 'consolidator') && (
               <NavLink to="/report" active={location.pathname === '/report'}>My Report</NavLink>
             )}
             {(user?.role === 'leader' || user?.role === 'consolidator') && (
