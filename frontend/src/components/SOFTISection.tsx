@@ -276,14 +276,17 @@ export function SOFTISectionEditable({ section, items, onChange, canReorder = fa
           <li
             key={i}
             draggable={canReorder}
-            onDragStart={() => handleDragStart(i)}
+            onDragStart={e => {
+              if (!(e.target as HTMLElement).closest('[data-drag-handle]')) { e.preventDefault(); return; }
+              handleDragStart(i);
+            }}
             onDragEnter={() => handleDragEnter(i)}
             onDragOver={e => e.preventDefault()}
             onDragEnd={handleDragEnd}
             className={`flex items-start gap-2 group rounded-lg transition-colors ${isMatch ? 'bg-yellow-50 ring-1 ring-yellow-300 px-1' : ''} ${canReorder && dragOver === i ? 'bg-indigo-50 ring-1 ring-indigo-300' : ''}`}
           >
             {canReorder && (
-              <div className="mt-2.5 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 flex-shrink-0 select-none" title="Drag to reorder">
+              <div data-drag-handle className="mt-2.5 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 flex-shrink-0 select-none" title="Drag to reorder">
                 ⠿
               </div>
             )}
