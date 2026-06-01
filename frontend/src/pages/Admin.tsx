@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getTeams, getMembers, createTeam, createMember, deleteMember, deleteTeam } from '../api';
+import { getTeams, getMembers, createTeam, createMember, updateMember, deleteMember, deleteTeam } from '../api';
 import type { Team, Member } from '../types';
 import ConfirmDialog from '../components/ConfirmDialog';
 
@@ -131,7 +131,6 @@ export default function Admin() {
                   className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 >
                   <option value="member">Member</option>
-                  <option value="leader">Leader</option>
                   <option value="consolidator">Consolidator</option>
                   <option value="secretary">Secretary</option>
                   <option value="admin">Admin</option>
@@ -160,22 +159,37 @@ export default function Admin() {
             <ul className="space-y-2 max-h-[32rem] overflow-y-auto">
               {members.map(m => (
                 <li key={m.id} className="flex items-center justify-between px-4 py-2.5 bg-gray-50 rounded-xl text-sm">
-                  <div>
-                    <span className="font-medium text-gray-700">{m.name}</span>
-                    <span className={`ml-2 text-xs px-1.5 py-0.5 rounded ${
-                      m.role === 'leader'      ? 'bg-indigo-100 text-indigo-700' :
-                      m.role === 'consolidator'? 'bg-teal-100 text-teal-700' :
-                      m.role === 'secretary'   ? 'bg-purple-100 text-purple-700' :
-                                                 'bg-gray-200 text-gray-500'
-                    }`}>{m.role}</span>
-                    {m.team_name && <span className="ml-1 text-xs text-gray-400">{m.team_name}</span>}
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className="font-medium text-gray-700 truncate">{m.name}</span>
+                    {m.team_name && <span className="text-xs text-gray-400 truncate">{m.team_name}</span>}
                   </div>
-                  <button
-                    onClick={() => setConfirm({ type: 'member', id: m.id, name: m.name })}
-                    className="text-red-400 hover:text-red-600 text-xs"
-                  >
-                    Delete
-                  </button>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <select
+                      value={m.role}
+                      onChange={async e => {
+                        await updateMember(m.id, { role: e.target.value });
+                        load();
+                      }}
+                      className={`text-xs px-1.5 py-0.5 rounded border-0 font-medium cursor-pointer focus:outline-none focus:ring-1 focus:ring-indigo-400 ${
+                        m.role === 'consolidator' ? 'bg-teal-100 text-teal-700' :
+                        m.role === 'leader'       ? 'bg-indigo-100 text-indigo-700' :
+                        m.role === 'secretary'    ? 'bg-purple-100 text-purple-700' :
+                        m.role === 'admin'        ? 'bg-red-100 text-red-700' :
+                                                    'bg-gray-200 text-gray-500'
+                      }`}
+                    >
+                      <option value="member">member</option>
+                      <option value="consolidator">consolidator</option>
+                      <option value="secretary">secretary</option>
+                      <option value="admin">admin</option>
+                    </select>
+                    <button
+                      onClick={() => setConfirm({ type: 'member', id: m.id, name: m.name })}
+                      className="text-red-400 hover:text-red-600 text-xs"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
