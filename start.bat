@@ -1,19 +1,18 @@
 @echo off
 echo Starting BTS SOFTI Weekly Report App...
 echo.
+echo Backend : http://localhost:3001
+echo Frontend: http://localhost:5174
+echo.
+echo Press Ctrl+C to stop all servers.
+echo ----------------------------------------
 
-:: Start backend
-start "BTS Backend" cmd /k "cd /d %~dp0backend && node server.js"
+:: Start backend silently in background
+start /B node "%~dp0backend\server.js"
 
-:: Wait a moment for backend to start
+:: Give backend a moment to bind
 timeout /t 2 /nobreak > nul
 
-:: Start frontend
-start "BTS Frontend" cmd /k "cd /d %~dp0frontend && npm run dev"
-
-echo.
-echo Backend running at: http://localhost:3001
-echo Frontend running at: http://localhost:5174
-echo.
-echo Open your browser at: http://localhost:5174
-pause
+:: Run frontend in foreground (keeps this window open)
+cd /d "%~dp0frontend"
+npm run dev
