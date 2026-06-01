@@ -167,7 +167,7 @@ export default function Admin() {
                     <select
                       value={m.role}
                       onChange={async e => {
-                        await updateMember(m.id, { role: e.target.value });
+                        await updateMember(m.id, { role: e.target.value as Member['role'] });
                         load();
                       }}
                       className={`text-xs px-1.5 py-0.5 rounded border-0 font-medium cursor-pointer focus:outline-none focus:ring-1 focus:ring-indigo-400 ${
