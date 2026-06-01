@@ -8,7 +8,7 @@ export interface Member {
   team_id: number | null;
   team_name?: string;
   name: string;
-  role: 'member' | 'leader' | 'secretary';
+  role: 'member' | 'leader' | 'consolidator' | 'secretary';
 }
 
 export interface SOFTIData {
@@ -48,7 +48,7 @@ export interface ConsolidatedReport {
   submitted_at?: string;
 }
 
-export type UserRole = 'member' | 'leader' | 'secretary' | 'admin';
+export type UserRole = 'member' | 'leader' | 'consolidator' | 'secretary' | 'admin';
 
 export interface CurrentUser {
   role: UserRole;

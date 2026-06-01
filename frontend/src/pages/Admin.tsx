@@ -132,6 +132,7 @@ export default function Admin() {
                 >
                   <option value="member">Member</option>
                   <option value="leader">Leader</option>
+                  <option value="consolidator">Consolidator</option>
                   <option value="secretary">Secretary</option>
                   <option value="admin">Admin</option>
                 </select>
@@ -162,9 +163,10 @@ export default function Admin() {
                   <div>
                     <span className="font-medium text-gray-700">{m.name}</span>
                     <span className={`ml-2 text-xs px-1.5 py-0.5 rounded ${
-                      m.role === 'leader'    ? 'bg-indigo-100 text-indigo-700' :
-                      m.role === 'secretary' ? 'bg-purple-100 text-purple-700' :
-                                               'bg-gray-200 text-gray-500'
+                      m.role === 'leader'      ? 'bg-indigo-100 text-indigo-700' :
+                      m.role === 'consolidator'? 'bg-teal-100 text-teal-700' :
+                      m.role === 'secretary'   ? 'bg-purple-100 text-purple-700' :
+                                                 'bg-gray-200 text-gray-500'
                     }`}>{m.role}</span>
                     {m.team_name && <span className="ml-1 text-xs text-gray-400">{m.team_name}</span>}
                   </div>
