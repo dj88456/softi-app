@@ -45,7 +45,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/report" element={
-              user?.role === 'member' || user?.role === 'consolidator'
+              user?.role === 'member'
                 ? <MemberReport />
                 : <Navigate to="/" replace />
             } />

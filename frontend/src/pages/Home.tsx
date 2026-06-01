@@ -7,10 +7,10 @@ import type { Team, Member, UserRole } from '../types';
 type Step = 'role' | 'identity';
 
 const ROLE_CARDS: { role: UserRole; label: string; desc: string; icon: string; color: string }[] = [
-  { role: 'member',    label: 'Team Member',   desc: 'Submit your individual weekly SOFTI report', icon: '📝', color: 'border-blue-400 hover:bg-blue-50' },
-  { role: 'leader',    label: 'Team Leader',   desc: 'Submit your report & consolidate team reports', icon: '👥', color: 'border-indigo-400 hover:bg-indigo-50' },
-  { role: 'secretary', label: 'Secretary',     desc: 'View all team reports & publish department summary', icon: '📋', color: 'border-purple-400 hover:bg-purple-50' },
-  { role: 'admin',     label: 'Admin',         desc: 'Manage teams and members', icon: '⚙️', color: 'border-gray-400 hover:bg-gray-50' },
+  { role: 'member',      label: 'Team Member',   desc: 'Submit your individual weekly SOFTI report', icon: '📝', color: 'border-blue-400 hover:bg-blue-50' },
+  { role: 'consolidator',label: 'Consolidator',  desc: 'Submit your report & consolidate team reports', icon: '👥', color: 'border-indigo-400 hover:bg-indigo-50' },
+  { role: 'secretary',   label: 'Secretary',     desc: 'View all team reports & publish department summary', icon: '📋', color: 'border-purple-400 hover:bg-purple-50' },
+  { role: 'admin',       label: 'Admin',         desc: 'Manage teams and members', icon: '⚙️', color: 'border-gray-400 hover:bg-gray-50' },
 ];
 
 export default function Home() {
@@ -29,7 +29,7 @@ export default function Home() {
   useEffect(() => {
     if (user) {
       if (user.role === 'secretary') navigate('/dashboard');
-      else if (user.role === 'leader') navigate('/consolidation');
+      else if (user.role === 'leader' || user.role === 'consolidator') navigate('/consolidation');
       else if (user.role === 'admin') navigate('/admin');
       else navigate('/report');
     }
@@ -49,7 +49,7 @@ export default function Home() {
   useEffect(() => {
     if (selectedTeam) {
       getMembers(selectedTeam).then(all =>
-        setMembers(all.filter(m => m.role === selectedRole || (selectedRole === 'leader' && m.role === 'leader')))
+        setMembers(all.filter(m => m.role === selectedRole))
       ).catch(console.error);
     }
   }, [selectedTeam, selectedRole]);
