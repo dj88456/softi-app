@@ -579,7 +579,16 @@ export default function TeamConsolidation() {
           title="Clear Report"
           message="Are you sure you want to clear all consolidated content? This cannot be undone."
           confirmLabel="Clear"
-          onConfirm={() => { setConsolidated({ successes: [], opportunities: [], failures: [], threats: [], issues: [] }); setSave('idle'); setShowClearConfirm(false); }}
+          onConfirm={() => {
+            const empty: SOFTIData = { successes: [], opportunities: [], failures: [], threats: [], issues: [] };
+            setConsolidated(empty);
+            setSave('idle');
+            setShowClearConfirm(false);
+            if (user?.team_id) {
+              saveConsolidated({ team_id: user.team_id, week, data: empty, status: 'draft' })
+                .catch(e => console.error('Clear save failed:', e));
+            }
+          }}
           onCancel={() => setShowClearConfirm(false)}
         />
       )}
