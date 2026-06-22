@@ -438,7 +438,7 @@ export default function TeamConsolidation() {
       const memberName = report.member_name ?? '';
       for (const s of SECTIONS) {
         for (const item of report.data[s] ?? []) {
-          if (/^learnings?/i.test(item.trim())) {
+          if (/^learnings?/i.test(item.trim()) || /^training/i.test(item.trim())) {
             dropped.push({ member_name: memberName, section: s, item, reason: 'learnings' });
             continue;
           }
