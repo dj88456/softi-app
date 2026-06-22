@@ -15,6 +15,7 @@ export default function Admin() {
   const [newMember, setNewMember] = useState({ name: '', team_id: '', role: 'member' as string });
   const [loading, setLoading] = useState(true);
   const [confirm, setConfirm] = useState<ConfirmState>(null);
+  const [editingName, setEditingName] = useState<{ id: number; value: string } | null>(null);
 
   async function load() {
     const [t, m] = await Promise.all([getTeams(), getMembers()]);
@@ -40,6 +41,13 @@ export default function Admin() {
       role: newMember.role,
     });
     setNewMember({ name: '', team_id: '', role: 'member' });
+    load();
+  }
+
+  async function handleRenameMember() {
+    if (!editingName || !editingName.value.trim()) return;
+    await updateMember(editingName.id, { name: editingName.value.trim() });
+    setEditingName(null);
     load();
   }
 
@@ -159,10 +167,33 @@ export default function Admin() {
             <ul className="space-y-2 max-h-[32rem] overflow-y-auto">
               {members.map(m => (
                 <li key={m.id} className="flex items-center justify-between px-4 py-2.5 bg-gray-50 rounded-xl text-sm">
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <span className="font-medium text-gray-700 truncate">{m.name}</span>
-                    {m.team_name && <span className="text-xs text-gray-400 truncate">{m.team_name}</span>}
-                  </div>
+                  {editingName?.id === m.id ? (
+                    <div className="flex items-center gap-2 flex-1 min-w-0 mr-2">
+                      <input
+                        autoFocus
+                        type="text"
+                        value={editingName.value}
+                        onChange={e => setEditingName(prev => prev && ({ ...prev, value: e.target.value }))}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') handleRenameMember();
+                          if (e.key === 'Escape') setEditingName(null);
+                        }}
+                        className="flex-1 border border-indigo-300 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 min-w-0"
+                      />
+                      <button onClick={handleRenameMember} className="text-indigo-600 hover:text-indigo-800 text-xs font-semibold">Save</button>
+                      <button onClick={() => setEditingName(null)} className="text-gray-400 hover:text-gray-600 text-xs">Cancel</button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <span className="font-medium text-gray-700 truncate">{m.name}</span>
+                      {m.team_name && <span className="text-xs text-gray-400 truncate">{m.team_name}</span>}
+                      <button
+                        onClick={() => setEditingName({ id: m.id, value: m.name })}
+                        className="text-gray-400 hover:text-indigo-500 text-xs ml-1"
+                        title="Rename"
+                      >✏️</button>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <select
                       value={m.role}
