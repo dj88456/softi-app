@@ -9,7 +9,7 @@ type Step = 'role' | 'identity';
 const ROLE_CARDS: { role: UserRole; label: string; desc: string; icon: string; color: string }[] = [
   { role: 'member',      label: 'Team Member',   desc: 'Submit your individual weekly SOFTI report', icon: '📝', color: 'border-blue-400 hover:bg-blue-50' },
   { role: 'consolidator',label: 'Consolidator',  desc: 'Submit your report & consolidate team reports', icon: '👥', color: 'border-indigo-400 hover:bg-indigo-50' },
-  { role: 'secretary',   label: 'Secretary',     desc: 'View all team reports & publish department summary', icon: '📋', color: 'border-purple-400 hover:bg-purple-50' },
+  { role: 'secretary',   label: 'BTS Report Publisher', desc: 'View all team reports & publish department summary', icon: '📋', color: 'border-purple-400 hover:bg-purple-50' },
   { role: 'admin',       label: 'Admin',         desc: 'Manage teams and members', icon: '⚙️', color: 'border-gray-400 hover:bg-gray-50' },
 ];
 

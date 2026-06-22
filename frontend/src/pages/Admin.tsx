@@ -132,7 +132,7 @@ export default function Admin() {
                 >
                   <option value="member">Member</option>
                   <option value="consolidator">Consolidator</option>
-                  <option value="secretary">Secretary</option>
+                  <option value="secretary">BTS Report Publisher</option>
                   <option value="admin">Admin</option>
                 </select>
                 {newMember.role !== 'secretary' && newMember.role !== 'admin' && (
@@ -180,7 +180,7 @@ export default function Admin() {
                     >
                       <option value="member">member</option>
                       <option value="consolidator">consolidator</option>
-                      <option value="secretary">secretary</option>
+                      <option value="secretary">BTS Report Publisher</option>
                       <option value="admin">admin</option>
                     </select>
                     <button
@@ -199,7 +199,7 @@ export default function Admin() {
 
       {secretaries.length === 0 && !loading && (
         <div className="mt-4 text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-lg p-3">
-          No secretary member found. Add one with role "Secretary" to enable the Department Summary view.
+          No BTS Report Publisher found. Add one with role "BTS Report Publisher" to enable the Department Summary view.
         </div>
       )}
     </div>

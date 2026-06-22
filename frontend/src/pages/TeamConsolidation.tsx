@@ -914,7 +914,7 @@ export default function TeamConsolidation() {
                   disabled={saveState === 'saving'}
                   className="px-5 py-2 rounded-lg bg-indigo-700 hover:bg-indigo-600 text-white text-sm font-semibold transition disabled:opacity-50"
                 >
-                  {isSubmitted ? 'Re-submit' : 'Submit to Secretary'}
+                  {isSubmitted ? 'Re-submit' : 'Submit to BTS Report Publisher'}
                 </button>
               </div>
             </div>
