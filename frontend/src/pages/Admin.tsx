@@ -138,10 +138,10 @@ export default function Admin() {
                   onChange={e => setNewMember(p => ({ ...p, role: e.target.value }))}
                   className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 >
-                  <option value="member">Member</option>
+                  <option value="member">Role</option>
                   <option value="consolidator">Consolidator</option>
                   <option value="secretary">BTS Report Publisher</option>
-                  <option value="admin">Admin</option>
+                  <option value="admin">Administrator</option>
                 </select>
                 {newMember.role !== 'secretary' && newMember.role !== 'admin' && (
                   <select
@@ -209,10 +209,10 @@ export default function Admin() {
                                                     'bg-gray-200 text-gray-500'
                       }`}
                     >
-                      <option value="member">member</option>
+                      <option value="member">Role</option>
                       <option value="consolidator">consolidator</option>
                       <option value="secretary">BTS Report Publisher</option>
-                      <option value="admin">admin</option>
+                      <option value="admin">Administrator</option>
                     </select>
                     <button
                       onClick={() => setConfirm({ type: 'member', id: m.id, name: m.name })}
