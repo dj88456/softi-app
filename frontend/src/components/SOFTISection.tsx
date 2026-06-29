@@ -63,17 +63,23 @@ function RenderText({ text, highlight }: { text: string; highlight?: string }) {
     highlight ? applyHighlight(line, highlight) : renderInline(line);
   return (
     <>
-      {lines.map((line, i) => (
-        <React.Fragment key={i}>
-          {i > 0 && (
-            <span className="flex items-start gap-1 mt-0.5">
-              <span className="text-gray-400 flex-shrink-0 leading-snug">○</span>
-              <span>{render(line)}</span>
+      {lines.map((line, i) => {
+        if (i === 0) return (
+          <React.Fragment key={i}>
+            <span className="font-bold">{render(line)}</span>
+          </React.Fragment>
+        );
+        const isLevel3 = line.startsWith('\t');
+        const displayLine = isLevel3 ? line.slice(1) : line;
+        return (
+          <React.Fragment key={i}>
+            <span className={`flex items-start gap-1 mt-0.5${isLevel3 ? ' ml-4' : ''}`}>
+              <span className="text-gray-400 flex-shrink-0 leading-snug text-sm">{isLevel3 ? '◦' : '○'}</span>
+              <span>{render(displayLine)}</span>
             </span>
-          )}
-          {i === 0 && <span className="font-bold">{render(line)}</span>}
-        </React.Fragment>
-      ))}
+          </React.Fragment>
+        );
+      })}
     </>
   );
 }
@@ -121,7 +127,7 @@ function RichTextInput({
       const { value, selectionStart: ss } = ta;
       const lineStart = value.lastIndexOf('\n', ss - 1) + 1;
       const lineText = value.slice(lineStart, ss);
-      const matchedPrefix = ['• ', '○ ', '– '].find(p => lineText.startsWith(p));
+      const matchedPrefix = ['• ', '○ ', '– ', '◦ '].find(p => lineText.startsWith(p));
 
       if (matchedPrefix) {
         e.preventDefault();

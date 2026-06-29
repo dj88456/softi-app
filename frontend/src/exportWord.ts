@@ -104,10 +104,12 @@ function buildSOFTIParagraphs(data: SOFTIData): Paragraph[] {
         children: [new TextRun({ text: stripMarkers(lines[0].replace(BULLET_PREFIX_RE, '')), bold: true, size: SIZE_BODY, color: '111827' })],
       }));
       for (const line of lines.slice(1)) {
+        const isLevel3 = line.startsWith('\t');
+        const lineText = isLevel3 ? line.slice(1) : line;
         out.push(new Paragraph({
-          bullet: { level: 0 },
+          bullet: { level: isLevel3 ? 1 : 0 },
           spacing: { before: 0, after: 0 },
-          children: parseInline(line.replace(BULLET_PREFIX_RE, ''), SIZE_BODY),
+          children: parseInline(lineText.replace(BULLET_PREFIX_RE, ''), SIZE_BODY),
         }));
       }
       if (idx < items.length - 1) out.push(blank());

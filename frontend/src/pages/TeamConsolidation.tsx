@@ -89,6 +89,11 @@ function isHollowBullet(line: string): boolean {
   return /^\s*[○◦□▷◇☐]/.test(line) || /^\s*o\t/.test(line);
 }
 
+// ◦ (ring bullet) specifically → Level 3 sub-item (stored with \t prefix)
+function isLevel3HollowBullet(line: string): boolean {
+  return /^\s*◦/.test(line);
+}
+
 // Strip any leading symbols/bullets/numbers from a line of text
 function stripLeading(line: string): string {
   return line
@@ -146,12 +151,14 @@ function parseSOFTI(raw: string): SOFTIData {
         }
       } else if (isHollowBullet(line)) {
         // Hollow bullet → always continuation of the current item
+        // ◦ specifically → Level 3 (stored with \t prefix)
+        const lineContent = (isLevel3HollowBullet(line) ? '\t' : '') + stripped;
         if (current.length > 0) {
-          current.push(stripped);
+          current.push(lineContent);
         } else if (items.length > 0) {
-          items[items.length - 1] += '\n' + stripped;
+          items[items.length - 1] += '\n' + lineContent;
         } else {
-          current.push(stripped);
+          current.push(lineContent);
         }
       } else {
         // Plain text line
