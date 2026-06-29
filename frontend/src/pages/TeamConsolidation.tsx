@@ -78,9 +78,14 @@ function detectHeader(line: string): SectionKey | null {
   return null;
 }
 
-// Solid filled bullets → new separate item
+// Solid filled bullets → new separate item (round/diamond shapes only)
 function isSolidBullet(line: string): boolean {
-  return /^\s*[•●▪■◆◉⬛⚫]/.test(line);
+  return /^\s*[•●◆◉⚫]/.test(line);
+}
+
+// Solid square bullets → Level 3 sub-item (stored with \t prefix)
+function isLevel3SolidBullet(line: string): boolean {
+  return /^\s*[▪■⬛]/.test(line);
 }
 
 // Hollow/open bullets → continuation of the previous item
@@ -139,6 +144,16 @@ function parseSOFTI(raw: string): SOFTIData {
       if (stripped === '') {
         if (current.length > 0) { items.push(current.join('\n')); current = []; }
         currentStartedWithText = false;
+      } else if (isLevel3SolidBullet(line)) {
+        // Solid square → Level 3 (stored with \t prefix)
+        const lineContent = '\t' + stripped;
+        if (current.length > 0) {
+          current.push(lineContent);
+        } else if (items.length > 0) {
+          items[items.length - 1] += '\n' + lineContent;
+        } else {
+          current.push(lineContent);
+        }
       } else if (isSolidBullet(line)) {
         if (currentStartedWithText) {
           // Plain-text title is already in current → solid bullets are its sub-lines
