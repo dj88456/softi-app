@@ -74,7 +74,7 @@ function RenderText({ text, highlight }: { text: string; highlight?: string }) {
         return (
           <React.Fragment key={i}>
             <span className={`flex items-start gap-1 mt-0.5${isLevel3 ? ' ml-4' : ''}`}>
-              <span className="text-gray-400 flex-shrink-0 leading-snug text-sm">{isLevel3 ? '◦' : '○'}</span>
+              <span className="text-gray-400 flex-shrink-0 leading-snug text-sm">{isLevel3 ? '•' : '○'}</span>
               <span>{render(displayLine)}</span>
             </span>
           </React.Fragment>
