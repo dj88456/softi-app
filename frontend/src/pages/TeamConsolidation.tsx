@@ -84,8 +84,9 @@ function isSolidBullet(line: string): boolean {
 }
 
 // Solid square bullets → Level 3 sub-item (stored with \t prefix)
+// Includes Unicode squares and  (Wingdings 2 PUA, pastes as "?" in browser)
 function isLevel3SolidBullet(line: string): boolean {
-  return /^\s*[▪■⬛]/.test(line);
+  return /^\s*[▪■⬛◼◾]/.test(line);
 }
 
 // Hollow/open bullets → continuation of the previous item
